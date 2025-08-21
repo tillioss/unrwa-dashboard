@@ -1,51 +1,15 @@
-export interface Student {
-  studentName: string;
-  emoji: string;
-  q1Answer: string;
-  q2Answer: string;
-  q3Answer: string;
-  q4Answer: string;
-  q5Answer: string;
-  q6Answer: string;
-  q7Answer: string;
-  q8Answer: string;
-  q9Answer: string;
-  q10Answer: string;
-  q11Answer: string;
-}
-
-export interface RubricScanResponse {
-  teacherName: string;
+export interface StudentAssessmentRecord {
+  $id?: string;
   school: string;
   grade: string;
-  date: string;
-  students: Student[];
+  section: string;
+  studentName: string;
+  parentQuestionnaire: string;
+  assessment: string;
+  createdAt: string;
 }
 
-export interface RatingLevels {
-  "0": string;
-  "1": string;
-  "2": string;
-  "3": string;
-}
-
-export interface Criterion {
-  id: string;
-  text: string;
-  example: string;
-}
-
-export interface SkillCategory {
-  categoryName: string;
-  criteria: Criterion[];
-}
-
-export interface RubricData {
-  ratingLevels: RatingLevels;
-  skillCategories: SkillCategory[];
-}
-
-export interface AssessmentRecord {
+export interface TeacherAssessmentRecord {
   $id?: string;
   teacherId: string;
   teacherName: string;

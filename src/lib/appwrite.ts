@@ -1,4 +1,4 @@
-import { AssessmentRecord } from "@/types";
+import { StudentAssessmentRecord, TeacherAssessmentRecord } from "@/types";
 import { Account, Client, Databases, Query, Storage } from "appwrite";
 
 const client = new Client()
@@ -19,7 +19,7 @@ const STUDENT_ASSESSMENT_COLLECTION_ID =
 
 export const getTeacherStudentAssessments = async (
   grade: string
-): Promise<AssessmentRecord[]> => {
+): Promise<TeacherAssessmentRecord[]> => {
   try {
     const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID;
     const collectionId = RUBRICS_COLLECTION_ID;
@@ -62,7 +62,7 @@ export const getTeacherStudentAssessments = async (
 
 export const getParentStudentAssessments = async (
   grade: string
-): Promise<AssessmentRecord[]> => {
+): Promise<StudentAssessmentRecord[]> => {
   try {
     const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID;
     const collectionId = STUDENT_ASSESSMENT_COLLECTION_ID;
@@ -90,6 +90,7 @@ export const getParentStudentAssessments = async (
       grade: doc.grade,
       section: doc.section,
       studentName: doc.studentName,
+      parentQuestionnaire: doc.parentQuestionnaire,
       assessment: doc.assessment,
       createdAt: doc.createdAt,
     }));

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Fredoka } from "next/font/google";
 import "./globals.css";
+
+const fredoka = Fredoka({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "UNWRA Teacher Dashboard",
@@ -14,7 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 min-h-screen">{children}</body>
+      <body className={`${fredoka.className} bg-gray-50 min-h-screen`}>
+        {children}
+      </body>
     </html>
   );
 }

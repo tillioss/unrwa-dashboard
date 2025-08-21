@@ -32,8 +32,7 @@ export interface ProcessedAssessmentData {
 
 // Utility function to process assessment data and calculate categories
 export const processAssessmentData = (
-  assessments: any[],
-  assessmentType?: string
+  assessments: any[]
 ): ProcessedAssessmentData => {
   if (!assessments || assessments.length === 0) {
     return {
@@ -122,10 +121,10 @@ export const processAssessmentData = (
       // Use different categorization ranges based on assessment type
       const isAssessment1 = Array.isArray(assessmentData);
       if (isAssessment1) {
-        // Assessment 1 categorization: 0–1.0 → Beginner, 1.1–2.4 → Learner, 2.5–3.0 → Expert
-        if (totalAverage <= 1.0) {
+        // Assessment 1 categorization: 0–1.66 → Beginner, 1.67–3 → Learner, 3.01–4 → Expert
+        if (totalAverage <= 1.66) {
           beginnerCount++;
-        } else if (totalAverage <= 2.4) {
+        } else if (totalAverage <= 3) {
           growthCount++;
         } else {
           expertCount++;
@@ -150,9 +149,9 @@ export const processAssessmentData = (
       ) => {
         if (isAssessment1) {
           // Assessment 1 ranges
-          if (average <= 1.0) {
+          if (average <= 1.66) {
             beginnerFn();
-          } else if (average <= 2.4) {
+          } else if (average <= 3) {
             growthFn();
           } else {
             expertFn();
@@ -294,12 +293,11 @@ export const processAssessmentData = (
 const calculateAssessment1Scores = (assessmentData: string[]) => {
   const questionScores: any = {};
 
-  // Assessment 1 scoring: 1=0, 2=1, 3=2, 4=3
   const scoringMatrix = {
-    "1": 0,
-    "2": 1,
-    "3": 2,
-    "4": 3,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
   };
 
   // Calculate scores for each question (0-10, 11 questions total)
@@ -466,14 +464,9 @@ const generateScoreFromData = (data: any): number => {
   return Math.random() * 100;
 };
 
-export const GRADES = [
-  "all grades",
-  "Grade 1",
-  "Grade 2",
-  "Grade 3",
-  "Grade 4",
-  "Grade 5",
-];
+export const GRADES = ["All Grades", "Grade 1"];
+
+export const SECTIONS = ["All Sections", "A", "B", "C"];
 
 export const ASSESSMENTS = [
   "Assessment 1: Teacher Report",
@@ -482,10 +475,6 @@ export const ASSESSMENTS = [
 
 export const CLASS_DATA: ClassData[] = [
   { id: "1", name: "Grade 1", preTest: "pending", postTest: "ongoing" },
-  { id: "2", name: "Grade 2", preTest: "completed", postTest: "ongoing" },
-  { id: "3", name: "Grade 3", preTest: "completed", postTest: "completed" },
-  { id: "4", name: "Grade 4", preTest: "completed", postTest: "completed" },
-  { id: "5", name: "Grade 5", preTest: "completed", postTest: "completed" },
 ];
 
 export const OVERALL_DATA: CategoryData = {
@@ -507,3 +496,387 @@ export const SELF_MANAGEMENT_DATA: CategoryData = {
 };
 
 export const QUICK_SUMMARY_TEXT = `Assessment 1 shows strong progress in self-awareness skills across Grade 1-3 students. Pre-test completion rate is 80% with post-test ongoing. Key improvement areas identified in emotional regulation and social skills development.`;
+
+// Function to generate CSV data for Assessment 1 (Teacher Report)
+export const generateAssessment1CSV = (assessments: any[]) => {
+  if (!assessments || assessments.length === 0) return "";
+
+  const headers = [
+    "Student Name",
+    "Section",
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+    "Q5",
+    "Q6",
+    "Q7",
+    "Q8",
+    "Q9",
+    "Q10",
+    "Q11",
+    "Overall Score",
+    "Self-Awareness Score",
+    "Self-Management Score",
+    "Social Awareness Score",
+    "Relationship Skills Score",
+    "Responsible Decision-Making Score",
+    "Metacognition Score",
+    "Empathy Score",
+    "Critical Thinking Score",
+  ];
+
+  const csvRows = [headers.join(",")];
+
+  assessments.forEach((record) => {
+    try {
+      let assessmentData;
+      if (typeof record.assessment === "string") {
+        try {
+          assessmentData = JSON.parse(record.assessment);
+        } catch {
+          assessmentData = [];
+        }
+      } else {
+        assessmentData = record.assessment;
+      }
+
+      if (Array.isArray(assessmentData)) {
+        // Calculate scores
+        const questionScores = calculateAssessment1Scores(assessmentData);
+        const categoryAverages =
+          calculateAssessment1CategoryAverages(questionScores);
+
+        // Prepare row data
+        const row = [
+          `"${record.studentName}"`,
+          `"${record.section}"`,
+          assessmentData[0] || "",
+          assessmentData[1] || "",
+          assessmentData[2] || "",
+          assessmentData[3] || "",
+          assessmentData[4] || "",
+          assessmentData[5] || "",
+          assessmentData[6] || "",
+          assessmentData[7] || "",
+          assessmentData[8] || "",
+          assessmentData[9] || "",
+          assessmentData[10] || "",
+          questionScores.total.toFixed(2),
+          categoryAverages.selfAwareness.toFixed(2),
+          categoryAverages.selfManagement.toFixed(2),
+          categoryAverages.socialAwareness.toFixed(2),
+          categoryAverages.relationshipSkills.toFixed(2),
+          categoryAverages.responsibleDecisionMaking.toFixed(2),
+          categoryAverages.metacognition.toFixed(2),
+          categoryAverages.empathy.toFixed(2),
+          categoryAverages.criticalThinking.toFixed(2),
+        ];
+
+        csvRows.push(row.join(","));
+      }
+    } catch (error) {
+      console.error("Error processing record for CSV:", error);
+    }
+  });
+
+  return csvRows.join("\n");
+};
+
+// Function to generate CSV data for Assessment 2 (Student Self-Assessment)
+export const generateAssessment2CSV = (assessments: any[]) => {
+  if (!assessments || assessments.length === 0) return "";
+
+  const headers = [
+    "Student Name",
+    "Section",
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
+    "Q5",
+    "Q6",
+    "Q7",
+    "Q8",
+    "Q9",
+    "Q10",
+    "Q11",
+    "Q12",
+    "Overall Score",
+    "Self-Awareness Score",
+    "Self-Management Score",
+    "Social Awareness Score",
+    "Relationship Skills Score",
+    "Responsible Decision-Making Score",
+    "Metacognition Score",
+    "Empathy Score",
+    "Critical Thinking Score",
+  ];
+
+  const csvRows = [headers.join(",")];
+
+  assessments.forEach((record) => {
+    try {
+      let assessmentData;
+      if (typeof record.assessment === "string") {
+        try {
+          assessmentData = JSON.parse(record.assessment);
+        } catch {
+          assessmentData = {};
+        }
+      } else {
+        assessmentData = record.assessment;
+      }
+
+      if (
+        assessmentData &&
+        typeof assessmentData === "object" &&
+        !Array.isArray(assessmentData)
+      ) {
+        // Calculate scores
+        const questionScores = calculateAssessment2Scores(assessmentData);
+        const categoryAverages =
+          calculateAssessment2CategoryAverages(questionScores);
+
+        // Prepare row data
+        const row = [
+          `"${record.studentName}"`,
+          `"${record.section}"`,
+          assessmentData["0"] || "",
+          assessmentData["1"] || "",
+          assessmentData["2"] || "",
+          assessmentData["3"] || "",
+          assessmentData["4"] || "",
+          assessmentData["5"] || "",
+          assessmentData["6"] || "",
+          assessmentData["7"] || "",
+          assessmentData["8"] || "",
+          assessmentData["9"] || "",
+          assessmentData["10"] || "",
+          assessmentData["11"] || "",
+          questionScores.total.toFixed(2),
+          categoryAverages.selfAwareness.toFixed(2),
+          categoryAverages.selfManagement.toFixed(2),
+          categoryAverages.socialAwareness.toFixed(2),
+          categoryAverages.relationshipSkills.toFixed(2),
+          categoryAverages.responsibleDecisionMaking.toFixed(2),
+          categoryAverages.metacognition.toFixed(2),
+          categoryAverages.empathy.toFixed(2),
+          categoryAverages.criticalThinking.toFixed(2),
+        ];
+
+        csvRows.push(row.join(","));
+      }
+    } catch (error) {
+      console.error("Error processing record for CSV:", error);
+    }
+  });
+
+  return csvRows.join("\n");
+};
+
+// Function to generate CSV data for Parent Questionnaire
+export const generateParentQuestionnaireCSV = (assessments: any[]) => {
+  if (!assessments || assessments.length === 0) return "";
+
+  const headers = [
+    "Student Name",
+    "Section",
+    "Parent Name",
+    "Child Sex",
+    "Date of Birth",
+    "Repeated Grade",
+    "Hearing Difficulty",
+    "Remembering Difficulty",
+    "Communication Difficulty",
+    "Q1_Feelings",
+    "Q2_Preferences",
+    "Q3_Persistence",
+    "Q4_Help_Seeking",
+    "Q5_Empathy",
+    "Q6_Comforting",
+    "Q7_Problem_Solving",
+    "Q8_Self_Regulation",
+    "Q9_Impulse_Control",
+    "Q10_Self_Awareness",
+    "Q11_Learning_Goals",
+    "Overall Score",
+    "Self-Awareness Score",
+    "Self-Management Score",
+    "Social Awareness Score",
+    "Relationship Skills Score",
+    "Responsible Decision-Making Score",
+    "Metacognition Score",
+    "Empathy Score",
+    "Critical Thinking Score",
+  ];
+
+  const csvRows = [headers.join(",")];
+
+  // Parent questionnaire scoring matrix
+  const parentScoringMatrix = {
+    Never: 0,
+    Sometimes: 1,
+    "Most of the time": 2,
+    "Almost always": 3,
+  };
+
+  // Parent questionnaire SEL categories mapping
+  const parentCategoryMapping = {
+    selfAwareness: ["q1_feelings", "q2_preferences"],
+    selfManagement: ["q8_self_regulation", "q9_impulse_control"],
+    socialAwareness: ["q5_empathy", "q6_comforting"],
+    relationshipSkills: ["q7_problem_solving"],
+    responsibleDecisionMaking: ["q9_impulse_control"],
+    metacognition: [
+      "q4_help_seeking",
+      "q10_self_awareness",
+      "q11_learning_goals",
+    ],
+    empathy: ["q5_empathy", "q6_comforting", "q7_problem_solving"],
+    criticalThinking: [
+      "q3_persistence",
+      "q4_help_seeking",
+      "q9_impulse_control",
+    ],
+  };
+
+  assessments.forEach((record) => {
+    try {
+      let parentQuestionnaire;
+      if (typeof record.parentQuestionnaire === "string") {
+        try {
+          parentQuestionnaire = JSON.parse(record.parentQuestionnaire);
+        } catch {
+          parentQuestionnaire = {};
+        }
+      } else {
+        parentQuestionnaire = record.parentQuestionnaire;
+      }
+
+      if (parentQuestionnaire && typeof parentQuestionnaire === "object") {
+        // Calculate scores for each question
+        const questionScores: any = {};
+        let totalScore = 0;
+
+        // Calculate individual question scores
+        for (let i = 1; i <= 11; i++) {
+          const questionKey = `q${i}`;
+          let fullQuestionKey = "";
+
+          // Map question numbers to actual keys
+          switch (i) {
+            case 1:
+              fullQuestionKey = "q1_feelings";
+              break;
+            case 2:
+              fullQuestionKey = "q2_preferences";
+              break;
+            case 3:
+              fullQuestionKey = "q3_persistence";
+              break;
+            case 4:
+              fullQuestionKey = "q4_help_seeking";
+              break;
+            case 5:
+              fullQuestionKey = "q5_empathy";
+              break;
+            case 6:
+              fullQuestionKey = "q6_comforting";
+              break;
+            case 7:
+              fullQuestionKey = "q7_problem_solving";
+              break;
+            case 8:
+              fullQuestionKey = "q8_self_regulation";
+              break;
+            case 9:
+              fullQuestionKey = "q9_impulse_control";
+              break;
+            case 10:
+              fullQuestionKey = "q10_self_awareness";
+              break;
+            case 11:
+              fullQuestionKey = "q11_learning_goals";
+              break;
+          }
+
+          const answer = parentQuestionnaire[fullQuestionKey];
+          const score =
+            parentScoringMatrix[answer as keyof typeof parentScoringMatrix] ||
+            0;
+          questionScores[questionKey] = score;
+          totalScore += score;
+        }
+
+        // Calculate category averages
+        const categoryAverages: any = {};
+        Object.entries(parentCategoryMapping).forEach(
+          ([category, questionKeys]) => {
+            let categoryScore = 0;
+            questionKeys.forEach((questionKey) => {
+              const questionNumber = questionKey.split("_")[0].replace("q", "");
+              categoryScore += questionScores[`q${questionNumber}`] || 0;
+            });
+            categoryAverages[category] = categoryScore / questionKeys.length;
+          }
+        );
+
+        // Prepare row data
+        const row = [
+          `"${record.studentName}"`,
+          `"${record.section}"`,
+          `"${parentQuestionnaire.parentName || ""}"`,
+          `"${parentQuestionnaire.childSex || ""}"`,
+          `"${parentQuestionnaire.childDob || ""}"`,
+          `"${parentQuestionnaire.repeatedGrade || ""}"`,
+          `"${parentQuestionnaire.hearingDifficulty || ""}"`,
+          `"${parentQuestionnaire.rememberingDifficulty || ""}"`,
+          `"${parentQuestionnaire.communicationDifficulty || ""}"`,
+          `"${parentQuestionnaire.q1_feelings || ""}"`,
+          `"${parentQuestionnaire.q2_preferences || ""}"`,
+          `"${parentQuestionnaire.q3_persistence || ""}"`,
+          `"${parentQuestionnaire.q4_help_seeking || ""}"`,
+          `"${parentQuestionnaire.q5_empathy || ""}"`,
+          `"${parentQuestionnaire.q6_comforting || ""}"`,
+          `"${parentQuestionnaire.q7_problem_solving || ""}"`,
+          `"${parentQuestionnaire.q8_self_regulation || ""}"`,
+          `"${parentQuestionnaire.q9_impulse_control || ""}"`,
+          `"${parentQuestionnaire.q10_self_awareness || ""}"`,
+          `"${parentQuestionnaire.q11_learning_goals || ""}"`,
+          totalScore.toFixed(2),
+          categoryAverages.selfAwareness.toFixed(2),
+          categoryAverages.selfManagement.toFixed(2),
+          categoryAverages.socialAwareness.toFixed(2),
+          categoryAverages.relationshipSkills.toFixed(2),
+          categoryAverages.responsibleDecisionMaking.toFixed(2),
+          categoryAverages.metacognition.toFixed(2),
+          categoryAverages.empathy.toFixed(2),
+          categoryAverages.criticalThinking.toFixed(2),
+        ];
+
+        csvRows.push(row.join(","));
+      }
+    } catch (error) {
+      console.error(
+        "Error processing parent questionnaire record for CSV:",
+        error
+      );
+    }
+  });
+
+  return csvRows.join("\n");
+};
+
+// Function to download CSV file
+export const downloadCSV = (csvContent: string, filename: string) => {
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
