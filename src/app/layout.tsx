@@ -5,7 +5,7 @@ import "./globals.css";
 const fredoka = Fredoka({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "UNWRA Teacher Dashboard",
+  title: "Tilli Teacher Dashboard",
   description:
     "Administrator dashboard for teachers to monitor student assessments and progress",
 };

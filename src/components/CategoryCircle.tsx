@@ -71,7 +71,7 @@ export default function CategoryCircle({
       <div
         className={`${getSizeClasses(size)} rounded-full ${colors.background} ${
           colors.text
-        } flex items-center justify-center font-bold mb-2`}
+        } flex items-center justify-center font-medium mb-2`}
       >
         {count}
       </div>

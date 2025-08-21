@@ -457,17 +457,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={selfAwarenessData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={selfAwarenessData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={selfAwarenessData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -481,17 +481,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={selfManagementData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={selfManagementData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={selfManagementData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -505,17 +505,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={socialAwarenessData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={socialAwarenessData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={socialAwarenessData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -529,17 +529,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={relationshipSkillsData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={relationshipSkillsData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={relationshipSkillsData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -553,17 +553,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={responsibleDecisionMakingData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={responsibleDecisionMakingData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={responsibleDecisionMakingData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -577,17 +577,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={metacognitionData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={metacognitionData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={metacognitionData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -599,17 +599,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={empathyData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={empathyData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={empathyData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -623,17 +623,17 @@ export default function Dashboard() {
                       <CategoryCircle
                         category="beginner"
                         count={criticalThinkingData.beginner}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="growth"
                         count={criticalThinkingData.growth}
-                        size="sm"
+                        size="md"
                       />
                       <CategoryCircle
                         category="expert"
                         count={criticalThinkingData.expert}
-                        size="sm"
+                        size="md"
                       />
                     </div>
                   </div>
@@ -649,7 +649,7 @@ export default function Dashboard() {
 
           {/* Category Definitions */}
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <h3 className="font-bold text-gray-900 mb-3">
+            <h3 className="font-medium text-gray-900 mb-3">
               Understanding the categories:
             </h3>
             <ul className="space-y-2 text-sm text-gray-700">
@@ -681,16 +681,18 @@ export default function Dashboard() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
         <div className="flex justify-around">
           <Link href="/" className="flex flex-col items-center gap-1 py-2">
-            <Home className="w-6 h-6 text-primary-600" />
-            <span className="text-xs text-primary-600 font-medium">Home</span>
+            <Home className="w-6 h-6 text-gray-400" />
+            <span className="text-xs text-gray-400 font-medium">Home</span>
           </Link>
           <Link href="/chat" className="flex flex-col items-center gap-1 py-2">
             <MessageCircle className="w-6 h-6 text-gray-400" />
             <span className="text-xs text-gray-400">AI Chat</span>
           </Link>
           <Link href="/data" className="flex flex-col items-center gap-1 py-2">
-            <BarChart3 className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400">Data View</span>
+            <BarChart3 className="w-6 h-6 text-primary-600" />
+            <span className="text-xs text-primary-600 font-medium">
+              Data View
+            </span>
           </Link>
         </div>
       </div>

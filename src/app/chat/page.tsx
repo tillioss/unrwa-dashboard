@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, ArrowLeft, Bot, User, Star } from "lucide-react";
+import {
+  Send,
+  ArrowLeft,
+  Bot,
+  User,
+  Star,
+  Home,
+  MessageCircle,
+  BarChart3,
+} from "lucide-react";
 import Link from "next/link";
 
 interface Message {
@@ -83,22 +92,15 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-primary-50 flex flex-col">
+    <div className="min-h-screen bg-primary-50 flex flex-col pb-20">
       {/* Header */}
       <div className="bg-white shadow-sm border-b px-4 py-4">
         <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </Link>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Bot className="w-6 h-6 text-white" />
-            </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">AI Assistant</h1>
+              <h1 className="text-xl font-medium text-gray-900">
+                AI Assistant
+              </h1>
               <p className="text-sm text-gray-600">
                 Ask me anything about your students
               </p>
@@ -179,7 +181,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white border-t border-gray-200 px-4 py-4 shadow-lg">
+      <div className="bg-white border-t border-gray-200 px-4 py-4 shadow-lg mb-4">
         <div className="flex items-end gap-3">
           <div className="flex-1 relative">
             <textarea
@@ -188,7 +190,7 @@ export default function ChatPage() {
               onKeyPress={handleKeyPress}
               placeholder="Ask me about your students' assessments, progress, or teaching strategies..."
               className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none shadow-sm"
-              rows={1}
+              rows={3}
               style={{ minHeight: "48px", maxHeight: "120px" }}
             />
             <div className="absolute right-3 bottom-3">
@@ -203,26 +205,25 @@ export default function ChatPage() {
             <Send className="w-4 h-4" />
           </button>
         </div>
+      </div>
 
-        {/* Quick Suggestions */}
-        <div className="mt-3">
-          <p className="text-xs text-gray-500 mb-2">Quick suggestions:</p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              "How are my Grade 3 students performing?",
-              "Suggest teaching strategies",
-              "Assessment completion status",
-              "Student progress insights",
-            ].map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => setInputText(suggestion)}
-                className="px-3 py-1 bg-primary-50 text-primary-700 text-xs rounded-full hover:bg-primary-100 transition-colors border border-primary-200"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
+      {/* Mobile Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+        <div className="flex justify-around">
+          <Link href="/" className="flex flex-col items-center gap-1 py-2">
+            <Home className="w-6 h-6 text-gray-400" />
+            <span className="text-xs text-gray-400">Home</span>
+          </Link>
+          <Link href="/chat" className="flex flex-col items-center gap-1 py-2">
+            <MessageCircle className="w-6 h-6 text-primary-600" />
+            <span className="text-xs text-primary-600 font-medium">
+              AI Chat
+            </span>
+          </Link>
+          <Link href="/data" className="flex flex-col items-center gap-1 py-2">
+            <BarChart3 className="w-6 h-6 text-gray-400" />
+            <span className="text-xs text-gray-400">Data View</span>
+          </Link>
         </div>
       </div>
     </div>
