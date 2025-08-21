@@ -104,4 +104,4 @@ appwrite.json
 # Local development
 .env.example
 
-*.json
+teacher.json
