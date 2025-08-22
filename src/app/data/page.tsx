@@ -175,7 +175,7 @@ export default function Dashboard() {
             priority
             className="h-6 w-auto object-contain"
           />
-          <span className="ml-3 text-white font-semibold text-lg">
+          <span className="ml-3 text-white font-medium text-lg">
             Tilli Assessment
           </span>
         </header>
@@ -245,7 +245,7 @@ export default function Dashboard() {
         {/* Quick Summary */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-primary-700">
+            <h2 className="text-lg font-medium text-primary-700">
               Quick Summary
             </h2>
             <button
@@ -268,7 +268,7 @@ export default function Dashboard() {
         {selectedGrade === "All Grades" &&
           selectedSection === "All Sections" && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-lg font-semibold text-primary-700 mb-4">
+              <h2 className="text-lg font-medium text-primary-700 mb-4">
                 How your classes are doing
               </h2>
               <div className="overflow-x-auto">
@@ -369,7 +369,7 @@ export default function Dashboard() {
 
         {/* Assessment Insights */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold text-primary-700 mb-4">
+          <h2 className="text-lg font-medium text-primary-700 mb-4">
             Class Assessment Insights
           </h2>
 
@@ -443,13 +443,13 @@ export default function Dashboard() {
                 </p>
 
                 {/* SEL Skill Categories Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-8">
                   {/* Self Awareness */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
                       Self Awareness
                     </h4>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={selfAwarenessData.beginner}
@@ -469,11 +469,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Self Management */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
                       Self Management
                     </h4>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={selfManagementData.beginner}
@@ -493,11 +493,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Social Awareness */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
                       Social Awareness
                     </h4>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={socialAwarenessData.beginner}
@@ -517,11 +517,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Relationship Skills */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
                       Relationship Skills
                     </h4>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={relationshipSkillsData.beginner}
@@ -541,11 +541,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Responsible Decision Making */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
                       Responsible Decision Making
                     </h4>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={responsibleDecisionMakingData.beginner}
@@ -565,11 +565,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Metacognition */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
                       Metacognition
                     </h4>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={metacognitionData.beginner}
@@ -589,9 +589,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Empathy */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">Empathy</h4>
-                    <div className="flex gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                      Empathy
+                    </h4>
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={empathyData.beginner}
@@ -611,11 +613,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* Critical Thinking */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-4 text-lg">
                       Critical Thinking
                     </h4>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
                         category="beginner"
                         count={criticalThinkingData.beginner}

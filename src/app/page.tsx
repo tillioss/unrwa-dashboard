@@ -19,28 +19,28 @@ export default function Dashboard() {
       icon: <Star className="w-5 h-5 text-yellow-500" />,
       content:
         "Studies show that when kids label their emotions, their stress levels drop and they calm down faster. Trying this can help with classroom behavior.",
-      color: "bg-yellow-50 border-yellow-200",
+      color: "bg-white border-yellow-200",
     },
     {
       title: "Keep routines predictable",
       icon: <Users className="w-5 h-5 text-blue-500" />,
       content:
         "Research suggests that consistent rituals, like morning greetings or end-of-day reflections, create safety and support SEL growth.",
-      color: "bg-blue-50 border-blue-200",
+      color: "bg-white border-blue-200",
     },
     {
       title: "Grow their feeling words",
       icon: <BookOpen className="w-5 h-5 text-green-500" />,
       content:
         "Studies show that teaching one new emotion word at a time (like 'proud' or 'frustrated') improves children's self-control and communication.",
-      color: "bg-green-50 border-green-200",
+      color: "bg-white border-green-200",
     },
     {
       title: "Check in one-to-one",
       icon: <TrendingUp className="w-5 h-5 text-purple-500" />,
       content:
         "Research has found that short, personal check-ins build trust and make children feel seen. Even 2 minutes can matter.",
-      color: "bg-purple-50 border-purple-200",
+      color: "bg-white border-purple-200",
     },
   ];
 
