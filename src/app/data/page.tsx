@@ -188,22 +188,6 @@ export default function Dashboard() {
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Grade
-              </label>
-              <select
-                value={selectedGrade}
-                onChange={(e) => setSelectedGrade(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
-              >
-                {grades.map((grade) => (
-                  <option key={grade} value={grade}>
-                    {grade}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Section
               </label>
               <select
@@ -218,22 +202,22 @@ export default function Dashboard() {
                 ))}
               </select>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Assessment
-              </label>
-              <select
-                value={selectedAssessment}
-                onChange={(e) => setSelectedAssessment(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
-              >
-                {assessments.map((assessment) => (
-                  <option key={assessment} value={assessment}>
-                    {assessment}
-                  </option>
-                ))}
-              </select>
-            </div>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Assessment
+            </label>
+            <select
+              value={selectedAssessment}
+              onChange={(e) => setSelectedAssessment(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+            >
+              {assessments.map((assessment) => (
+                <option key={assessment} value={assessment}>
+                  {assessment}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
@@ -281,95 +265,107 @@ export default function Dashboard() {
         </div>
 
         {/* Assessment Tracker */}
-        {selectedGrade === "All Grades" && (
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-semibold text-primary-700 mb-4">
-              How your classes are doing
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      Section
-                    </th>
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      Total Students
-                    </th>
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      Assessment Entries
-                    </th>
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    // Student counts for Grade 1 sections
-                    const sectionStudentCounts = {
-                      A: 26,
-                      B: 24,
-                      C: 26,
-                    };
+        {selectedGrade === "All Grades" &&
+          selectedSection === "All Sections" && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-semibold text-primary-700 mb-4">
+                How your classes are doing
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        Section
+                      </th>
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        Total Students
+                      </th>
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        Assessment Entries
+                      </th>
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      // Student counts for Grade 1 sections
+                      const sectionStudentCounts = {
+                        A: 26,
+                        B: 24,
+                        C: 26,
+                      };
 
-                    // Calculate assessment entries for each section
-                    const sectionEntries = {
-                      A: assessmentData.filter(
-                        (record) => record.section === "A"
-                      ).length,
-                      B: assessmentData.filter(
-                        (record) => record.section === "B"
-                      ).length,
-                      C: assessmentData.filter(
-                        (record) => record.section === "C"
-                      ).length,
-                    };
+                      // Calculate assessment entries for each section
+                      const sectionEntries = {
+                        A: assessmentData.filter(
+                          (record) => record.section === "A"
+                        ).length,
+                        B: assessmentData.filter(
+                          (record) => record.section === "B"
+                        ).length,
+                        C: assessmentData.filter(
+                          (record) => record.section === "C"
+                        ).length,
+                      };
 
-                    // Determine status for each section
-                    const getSectionStatus = (section: string) => {
-                      const totalStudents =
-                        sectionStudentCounts[
-                          section as keyof typeof sectionStudentCounts
-                        ];
-                      const entries =
-                        sectionEntries[section as keyof typeof sectionEntries];
+                      // Determine status for each section
+                      const getSectionStatus = (section: string) => {
+                        const totalStudents =
+                          sectionStudentCounts[
+                            section as keyof typeof sectionStudentCounts
+                          ];
+                        const entries =
+                          sectionEntries[
+                            section as keyof typeof sectionEntries
+                          ];
 
-                      if (entries === 0) return "pending";
-                      if (entries === totalStudents) return "completed";
-                      return "ongoing";
-                    };
+                        if (entries === 0) return "pending";
+                        if (entries === totalStudents) return "completed";
+                        return "ongoing";
+                      };
 
-                    return Object.keys(sectionStudentCounts).map((section) => {
-                      const totalStudents =
-                        sectionStudentCounts[
-                          section as keyof typeof sectionStudentCounts
-                        ];
-                      const entries =
-                        sectionEntries[section as keyof typeof sectionEntries];
-                      const status = getSectionStatus(section);
+                      return Object.keys(sectionStudentCounts).map(
+                        (section) => {
+                          const totalStudents =
+                            sectionStudentCounts[
+                              section as keyof typeof sectionStudentCounts
+                            ];
+                          const entries =
+                            sectionEntries[
+                              section as keyof typeof sectionEntries
+                            ];
+                          const status = getSectionStatus(section);
 
-                      return (
-                        <tr key={section} className="border-b border-gray-100">
-                          <td className="py-3 px-2 font-medium text-gray-900">
-                            Grade 1 {section}
-                          </td>
-                          <td className="py-3 px-2 text-gray-600">
-                            {totalStudents}
-                          </td>
-                          <td className="py-3 px-2 text-gray-600">{entries}</td>
-                          <td className="py-3 px-2">
-                            <StatusBadge status={status} />
-                          </td>
-                        </tr>
+                          return (
+                            <tr
+                              key={section}
+                              className="border-b border-gray-100"
+                            >
+                              <td className="py-3 px-2 font-medium text-gray-900">
+                                Grade 1 {section}
+                              </td>
+                              <td className="py-3 px-2 text-gray-600">
+                                {totalStudents}
+                              </td>
+                              <td className="py-3 px-2 text-gray-600">
+                                {entries}
+                              </td>
+                              <td className="py-3 px-2">
+                                <StatusBadge status={status} />
+                              </td>
+                            </tr>
+                          );
+                        }
                       );
-                    });
-                  })()}
-                </tbody>
-              </table>
+                    })()}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Assessment Insights */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
