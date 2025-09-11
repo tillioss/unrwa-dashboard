@@ -1,24 +1,30 @@
-# UNWRA Teacher Dashboard
+# UNWRA Dashboard
 
-A modern, mobile-first teacher admin dashboard built with Next.js and Tailwind CSS for monitoring student assessments and progress.
+A comprehensive dashboard for teachers to monitor student assessments and progress, with support for English and Arabic languages.
 
 ## Features
 
-- **Mobile-First Design**: Optimized for mobile devices with responsive layout
-- **Grade & Class Selection**: Dropdown menus to select specific grades and classes
-- **Assessment Management**: View data from 4 different assessments
-- **Quick Summary**: AI-generated summaries of assessment data (toggle on/off)
-- **Assessment Tracker**: Table showing assessment deployment status and progress
-- **Class Insights**: Detailed breakdown of student performance by categories
-- **Mobile Navigation**: Bottom navigation with Home, AI Chat, and Data View icons
+- **Multi-language Support**: English and Arabic with automatic RTL layout support
+- **Language Picker**: Easy switching between languages with a dropdown menu
+- **Responsive Design**: Works on desktop and mobile devices
+- **Assessment Tracking**: Monitor student progress across different SEL skill categories
+- **AI Chat Assistant**: Get insights and recommendations about your students
+- **Data Export**: Download assessment data in CSV format
 
-## Tech Stack
+## Language Support
 
-- **Framework**: Next.js 14 with App Router
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Language**: TypeScript
-- **Font**: Inter (Google Fonts)
+The dashboard supports two languages:
+
+- **English (en)**: Default language with LTR layout
+- **Arabic (ar)**: Full RTL support with Arabic translations
+
+### Switching Languages
+
+Use the language picker in the top-right corner of any page to switch between languages. The interface will automatically adjust:
+
+- Text direction (LTR/RTL)
+- Font family for better readability
+- Layout adjustments for RTL languages
 
 ## Getting Started
 
@@ -40,100 +46,72 @@ cd unwra-dashboard
 
 ```bash
 npm install
-# or
-yarn install
 ```
 
 3. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Project Structure
-
-```
-unwra-dashboard/
-├── src/
-│   ├── app/
-│   │   ├── globals.css          # Global styles and Tailwind imports
-│   │   ├── layout.tsx           # Root layout component
-│   │   └── page.tsx             # Main dashboard page
-│   └── components/              # Reusable components (future)
-├── public/                      # Static assets
-├── package.json                 # Dependencies and scripts
-├── tailwind.config.js          # Tailwind CSS configuration
-├── tsconfig.json               # TypeScript configuration
-└── README.md                   # Project documentation
-```
-
-## Key Components
-
-### Dashboard Sections
-
-1. **Header**: Logo, title, and AI search input
-2. **Navigation**: Grade/class dropdowns and assessment selection
-3. **Quick Summary**: Toggleable AI-generated summary (max 60 words)
-4. **Assessment Tracker**: Table showing assessment status (Completed, Ongoing, Pending)
-5. **Class Assessment Insights**: Collapsible sections with detailed performance data
-6. **Mobile Navigation**: Bottom navigation bar with 3 icons
-
-### Data Structure
-
-- **Grades**: Grade 1-5 selection
-- **Assessments**: 4 different assessment types
-- **Status Types**: Completed, Ongoing, Pending
-- **Categories**: Beginner, Growth, Expert
-- **Performance Areas**: Self Awareness, Self Management
-
-## Customization
-
-### Colors
-
-The dashboard uses a custom color palette defined in `tailwind.config.js`:
-
-- Primary: Blue shades
-- Secondary: Pink shades
-- Success: Green shades
-- Warning: Yellow/Orange shades
-- Danger: Red shades
-
-### Adding New Features
-
-1. Create new components in `src/components/`
-2. Update the main dashboard in `src/app/page.tsx`
-3. Add new routes in `src/app/` for additional pages
-
-## Build and Deployment
-
-### Build for Production
+### Building for Production
 
 ```bash
 npm run build
-# or
-yarn build
-```
-
-### Start Production Server
-
-```bash
 npm start
-# or
-yarn start
 ```
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app router pages
+│   ├── chat/             # AI chat interface
+│   ├── data/             # Data visualization and export
+│   └── page.tsx          # Main dashboard
+├── components/            # Reusable React components
+│   ├── LanguagePicker.tsx # Language selection component
+│   ├── StatusBadge.tsx   # Status indicator component
+│   └── CategoryCircle.tsx # Category visualization
+├── lib/                   # Utility libraries
+│   ├── i18n.ts          # Internationalization configuration
+│   ├── appwrite.ts      # Appwrite client configuration
+│   └── locales/         # Translation files
+│       ├── en.json      # English translations
+│       └── ar.json      # Arabic translations
+├── types/                 # TypeScript type definitions
+└── utils/                 # Utility functions
+```
+
+## Adding New Languages
+
+To add support for additional languages:
+
+1. Create a new translation file in `src/lib/locales/` (e.g., `fr.json`)
+2. Add the language to the `resources` object in `src/lib/i18n.ts`
+3. Update the `LanguagePicker` component to include the new language
+4. Add appropriate RTL support if needed
+
+## Technologies Used
+
+- **Next.js 14**: React framework with app router
+- **React 18**: UI library
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **react-i18next**: Internationalization for React
+- **i18next**: Internationalization framework
+- **Lucide React**: Icon library
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test thoroughly
+4. Add tests if applicable
 5. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.

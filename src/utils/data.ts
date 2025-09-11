@@ -356,7 +356,7 @@ const calculateAssessment2Scores = (assessmentData: any) => {
 
   // Assessment 2 scoring matrix based on the provided rules
   const scoringMatrix = {
-    "0": (answer: string) => (answer === "3" ? 3 : 1), // Q1: answer 3 gets 3 marks rest 1 mark
+    "0": (answer: string) => (answer === "2" ? 3 : 1), // Q1: answer 2 gets 3 marks rest 1 mark
     "1": (answer: string) => (["1", "2", "3"].includes(answer) ? 3 : 1), // Q2: answers 1,2,3 gets 3 marks rest 1 mark
     "2": (answer: string) => (answer === "1" ? 3 : answer === "3" ? 2 : 0), // Q3: answer 1 gets 3 marks, answer 3 gets 2 marks rest gets 0
     "3": (answer: string) => (answer === "1" ? 3 : 0), // Q4: answer 1 gets 3 marks rest 0 mark
@@ -374,6 +374,10 @@ const calculateAssessment2Scores = (assessmentData: any) => {
   for (let i = 0; i <= 11; i++) {
     const questionKey = i.toString();
     const answer = assessmentData[questionKey];
+
+    if (questionKey === "0") {
+      console.log(questionKey, answer);
+    }
 
     if (answer && scoringMatrix[questionKey as keyof typeof scoringMatrix]) {
       const score =

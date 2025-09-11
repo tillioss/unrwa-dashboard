@@ -12,6 +12,8 @@ import {
   BarChart3,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import LanguagePicker from "../../components/LanguagePicker";
 
 interface Message {
   id: string;
@@ -21,10 +23,11 @@ interface Message {
 }
 
 export default function ChatPage() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      text: "Hello! I'm your AI assistant. I can help you with questions about your students' assessments, provide insights on their progress, and suggest teaching strategies. What would you like to know?",
+      text: t("chat.welcomeMessage"),
       sender: "ai",
       timestamp: new Date(),
     },
@@ -58,11 +61,11 @@ export default function ChatPage() {
     // Simulate AI response
     setTimeout(() => {
       const aiResponses = [
-        "Based on the assessment data, I can see that your Grade 3 students are showing strong improvement in self-awareness skills. The completion rate for Assessment 1 is 85%, which is above the target of 80%.",
-        "Looking at the data, I notice that students in the 'Growth' category have increased by 15% this month. This suggests your teaching strategies are working well. Consider focusing on the 'Beginner' students who might need additional support.",
-        "The assessment insights show that Self Management skills need more attention. Students in this category are showing slower progress compared to Self Awareness. I'd recommend incorporating more hands-on activities.",
-        "Your Grade 2 class has completed 90% of their pre-tests, which is excellent progress. The post-test is currently ongoing with 60% completion. The data suggests they're on track to meet learning objectives.",
-        "I can help you analyze the assessment patterns. Would you like me to generate a detailed report on specific areas where students are struggling, or would you prefer suggestions for improvement strategies?",
+        t("chat.responses.response1"),
+        t("chat.responses.response2"),
+        t("chat.responses.response3"),
+        t("chat.responses.response4"),
+        t("chat.responses.response5"),
       ];
 
       const randomResponse =
@@ -95,17 +98,16 @@ export default function ChatPage() {
     <div className="min-h-screen bg-primary-50 flex flex-col pb-20">
       {/* Header */}
       <div className="bg-white shadow-sm border-b px-4 py-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-xl font-medium text-gray-900">
-                AI Assistant
+                {t("chat.title")}
               </h1>
-              <p className="text-sm text-gray-600">
-                Ask me anything about your students
-              </p>
+              <p className="text-sm text-gray-600">{t("chat.subtitle")}</p>
             </div>
           </div>
+          <LanguagePicker />
         </div>
       </div>
 
@@ -188,7 +190,7 @@ export default function ChatPage() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask me about your students' assessments, progress, or teaching strategies..."
+              placeholder={t("chat.inputPlaceholder")}
               className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none shadow-sm"
               rows={3}
               style={{ minHeight: "48px", maxHeight: "120px" }}
@@ -212,17 +214,19 @@ export default function ChatPage() {
         <div className="flex justify-around">
           <Link href="/" className="flex flex-col items-center gap-1 py-2">
             <Home className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400">Home</span>
+            <span className="text-xs text-gray-400">{t("common.home")}</span>
           </Link>
           <Link href="/chat" className="flex flex-col items-center gap-1 py-2">
             <MessageCircle className="w-6 h-6 text-primary-600" />
             <span className="text-xs text-primary-600 font-medium">
-              AI Chat
+              {t("common.aiChat")}
             </span>
           </Link>
           <Link href="/data" className="flex flex-col items-center gap-1 py-2">
             <BarChart3 className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400">Data View</span>
+            <span className="text-xs text-gray-400">
+              {t("common.dataView")}
+            </span>
           </Link>
         </div>
       </div>

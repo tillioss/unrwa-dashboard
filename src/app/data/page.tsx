@@ -13,6 +13,8 @@ import {
 import StatusBadge from "@/components/StatusBadge";
 import CategoryCircle from "@/components/CategoryCircle";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import LanguagePicker from "../../components/LanguagePicker";
 import {
   getTeacherStudentAssessments,
   getParentStudentAssessments,
@@ -31,6 +33,7 @@ import {
 } from "@/utils/data";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [selectedGrade, setSelectedGrade] = useState("All Grades");
   const [selectedSection, setSelectedSection] = useState("All Sections");
   const [selectedAssessment, setSelectedAssessment] = useState(
@@ -166,18 +169,21 @@ export default function Dashboard() {
     <div className="min-h-screen bg-primary-50 pb-20">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <header className="w-full bg-[#82A4DE] shadow-sm border-b flex items-center px-4 py-2 sm:px-6">
-          <Image
-            src="/images/logo/logo.png"
-            alt="Tilli Assessment Logo"
-            width={40}
-            height={20}
-            priority
-            className="h-6 w-auto object-contain"
-          />
-          <span className="ml-3 text-white font-medium text-lg">
-            Tilli Assessment
-          </span>
+        <header className="w-full bg-[#82A4DE] shadow-sm border-b flex items-center justify-between px-4 py-2 sm:px-6">
+          <div className="flex items-center">
+            <Image
+              src="/images/logo/logo.png"
+              alt="Tilli Assessment Logo"
+              width={40}
+              height={20}
+              priority
+              className="h-6 w-auto object-contain"
+            />
+            <span className="ml-3 text-white font-medium text-lg">
+              {t("dashboard.title")}
+            </span>
+          </div>
+          <LanguagePicker />
         </header>
       </div>
 
@@ -188,7 +194,7 @@ export default function Dashboard() {
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Section
+                {t("data.section")}
               </label>
               <select
                 value={selectedSection}
@@ -205,7 +211,7 @@ export default function Dashboard() {
           </div>
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Assessment
+              {t("data.assessment")}
             </label>
             <select
               value={selectedAssessment}
@@ -229,9 +235,7 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              <span className="ml-3 text-gray-600">
-                Loading assessment data...
-              </span>
+              <span className="ml-3 text-gray-600">{t("data.loading")}</span>
             </div>
           </div>
         )}
@@ -246,13 +250,13 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-medium text-primary-700">
-              Quick Summary
+              {t("data.quickSummary")}
             </h2>
             <button
               onClick={() => setShowQuickSummary(!showQuickSummary)}
               className="text-primary-700 hover:text-primary-700"
             >
-              {showQuickSummary ? "Hide" : "Show"}
+              {showQuickSummary ? t("common.hide") : t("common.show")}
             </button>
           </div>
           {showQuickSummary && (
@@ -269,23 +273,23 @@ export default function Dashboard() {
           selectedSection === "All Sections" && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
               <h2 className="text-lg font-medium text-primary-700 mb-4">
-                How your classes are doing
+                {t("data.classesProgress")}
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="text-left py-2 px-2 font-medium text-gray-700">
-                        Section
+                        {t("data.section")}
                       </th>
                       <th className="text-left py-2 px-2 font-medium text-gray-700">
-                        Total Students
+                        {t("data.totalStudents")}
                       </th>
                       <th className="text-left py-2 px-2 font-medium text-gray-700">
-                        Assessment Entries
+                        {t("data.assessmentEntries")}
                       </th>
                       <th className="text-left py-2 px-2 font-medium text-gray-700">
-                        Status
+                        {t("data.status")}
                       </th>
                     </tr>
                   </thead>
@@ -353,7 +357,7 @@ export default function Dashboard() {
                               <td className="py-3 px-2 text-gray-600">
                                 {entries}
                               </td>
-                              <td className="py-3 px-2">
+                              <td className="py-2">
                                 <StatusBadge status={status} />
                               </td>
                             </tr>
@@ -370,7 +374,7 @@ export default function Dashboard() {
         {/* Assessment Insights */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-lg font-medium text-primary-700 mb-4">
-            Class Assessment Insights
+            {t("data.classAssessmentInsights")}
           </h2>
 
           {/* Overall Section */}
@@ -384,16 +388,18 @@ export default function Dashboard() {
               ) : (
                 <ChevronRight className="w-4 h-4" />
               )}
-              Over All:
+              {t("data.overall")}:
             </button>
             {showOverallInsights && (
               <div className="ml-6 space-y-4">
                 <p className="text-gray-600 text-sm">
-                  See how the gist of assessment data
+                  {t("data.overallDescription")}
                 </p>
                 <p className="text-gray-700 font-medium">
-                  Total number of (out of {processedData.totalStudents}{" "}
-                  students):
+                  {t("data.totalStudentsOutOf", {
+                    count: processedData.totalStudents,
+                  })}
+                  :
                 </p>
 
                 <div className="flex gap-4">
@@ -416,7 +422,7 @@ export default function Dashboard() {
 
                 <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
                   <Star className="w-4 h-4 text-primary-500" />
-                  What does this mean?
+                  {t("data.whatDoesThisMean")}
                 </button>
               </div>
             )}
@@ -433,13 +439,15 @@ export default function Dashboard() {
               ) : (
                 <ChevronRight className="w-4 h-4" />
               )}
-              Details:
+              {t("data.details")}:
             </button>
             {showDetails && (
               <div className="ml-6 space-y-6">
-                <p className="text-gray-600 text-sm">See each category data</p>
+                <p className="text-gray-600 text-sm">
+                  {t("data.detailsDescription")}
+                </p>
                 <p className="text-gray-700 font-medium">
-                  See how your students are doing in the 8 SEL skill categories:
+                  {t("data.selSkillCategories")}
                 </p>
 
                 {/* SEL Skill Categories Grid */}
@@ -447,7 +455,7 @@ export default function Dashboard() {
                   {/* Self Awareness */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Self Awareness
+                      {t("data.selfAwareness")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -471,7 +479,7 @@ export default function Dashboard() {
                   {/* Self Management */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Self Management
+                      {t("data.selfManagement")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -495,7 +503,7 @@ export default function Dashboard() {
                   {/* Social Awareness */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Social Awareness
+                      {t("data.socialAwareness")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -519,7 +527,7 @@ export default function Dashboard() {
                   {/* Relationship Skills */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Relationship Skills
+                      {t("data.relationshipSkills")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -543,7 +551,7 @@ export default function Dashboard() {
                   {/* Responsible Decision Making */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Responsible Decision Making
+                      {t("data.responsibleDecisionMaking")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -567,7 +575,7 @@ export default function Dashboard() {
                   {/* Metacognition */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Metacognition
+                      {t("data.metacognition")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -591,7 +599,7 @@ export default function Dashboard() {
                   {/* Empathy */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Empathy
+                      {t("data.empathy")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -615,7 +623,7 @@ export default function Dashboard() {
                   {/* Critical Thinking */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                      Critical Thinking
+                      {t("data.criticalThinking")}
                     </h4>
                     <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                       <CategoryCircle
@@ -639,7 +647,7 @@ export default function Dashboard() {
 
                 <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
                   <Star className="w-4 h-4 text-primary-500" />
-                  How can I make it better?
+                  {t("data.howCanIMakeItBetter")}
                 </button>
               </div>
             )}
@@ -648,26 +656,31 @@ export default function Dashboard() {
           {/* Category Definitions */}
           <div className="mt-6 pt-4 border-t border-gray-200">
             <h3 className="font-medium text-gray-900 mb-3">
-              Understanding the categories:
+              {t("data.understandingCategories")}:
             </h3>
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
                 <span>
-                  <strong className="text-[#EF4444]">Beginner:</strong> Students
-                  who are just starting to learn the concepts.
+                  <strong className="text-[#EF4444]">
+                    {t("data.beginner")}:
+                  </strong>{" "}
+                  {t("data.beginnerDescription")}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span>
-                  <strong className="text-[#3B82F6]">Growth:</strong> Students
-                  who are showing improvement and growth in their understanding.
+                  <strong className="text-[#3B82F6]">
+                    {t("data.growth")}:
+                  </strong>{" "}
+                  {t("data.growthDescription")}
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <span>
-                  <strong className="text-[#22C55E]">Expert:</strong> Students
-                  who have demonstrated a strong grasp of the concepts and are
-                  excelling.
+                  <strong className="text-[#22C55E]">
+                    {t("data.expert")}:
+                  </strong>{" "}
+                  {t("data.expertDescription")}
                 </span>
               </li>
             </ul>
@@ -680,16 +693,18 @@ export default function Dashboard() {
         <div className="flex justify-around">
           <Link href="/" className="flex flex-col items-center gap-1 py-2">
             <Home className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400 font-medium">Home</span>
+            <span className="text-xs text-gray-400 font-medium">
+              {t("common.home")}
+            </span>
           </Link>
           <Link href="/chat" className="flex flex-col items-center gap-1 py-2">
             <MessageCircle className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400">AI Chat</span>
+            <span className="text-xs text-gray-400">{t("common.aiChat")}</span>
           </Link>
           <Link href="/data" className="flex flex-col items-center gap-1 py-2">
             <BarChart3 className="w-6 h-6 text-primary-600" />
             <span className="text-xs text-primary-600 font-medium">
-              Data View
+              {t("common.dataView")}
             </span>
           </Link>
         </div>

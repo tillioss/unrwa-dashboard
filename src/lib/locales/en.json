@@ -1,0 +1,89 @@
+{
+  "common": {
+    "home": "Home",
+    "aiChat": "AI Chat",
+    "dataView": "Data View",
+    "show": "Show",
+    "hide": "Hide"
+  },
+  "dashboard": {
+    "title": "Tilli Assessment Dashboard",
+    "mainHeading": "SEL Skills Development Tips",
+    "mainDescription": "Practical strategies to help children develop essential social and emotional learning skills"
+  },
+  "tips": {
+    "nameItToTameIt": {
+      "title": "Name it to tame it",
+      "content": "Studies show that when kids label their emotions, their stress levels drop and they calm down faster. Trying this can help with classroom behavior."
+    },
+    "keepRoutinesPredictable": {
+      "title": "Keep routines predictable",
+      "content": "Research suggests that consistent rituals, like morning greetings or end-of-day reflections, create safety and support SEL growth."
+    },
+    "growTheirFeelingWords": {
+      "title": "Grow their feeling words",
+      "content": "Studies show that teaching one new emotion word at a time (like 'proud' or 'frustrated') improves children's self-control and communication."
+    },
+    "checkInOneToOne": {
+      "title": "Check in one-to-one",
+      "content": "Research has found that short, personal check-ins build trust and make children feel seen. Even 2 minutes can matter."
+    }
+  },
+  "chat": {
+    "title": "AI Assistant",
+    "subtitle": "Ask me anything about your students",
+    "welcomeMessage": "Hello! I'm your AI assistant. I can help you with questions about your students' assessments, provide insights on their progress, and suggest teaching strategies. What would you like to know?",
+    "inputPlaceholder": "Ask me about your students' assessments, progress, or teaching strategies...",
+    "responses": {
+      "response1": "Based on the assessment data, I can see that your Grade 3 students are showing strong improvement in self-awareness skills. The completion rate for Assessment 1 is 85%, which is above the target of 80%.",
+      "response2": "Looking at the data, I notice that students in the 'Growth' category have increased by 15% this month. This suggests your teaching strategies are working well. Consider focusing on the 'Beginner' students who might need additional support.",
+      "response3": "The assessment insights show that Self Management skills need more attention. Students in this category are showing slower progress compared to Self Awareness. I'd recommend incorporating more hands-on activities.",
+      "response4": "Your Grade 2 class has completed 90% of their pre-tests, which is excellent progress. The post-test is currently ongoing with 60% completion. The data suggests they're on track to meet learning objectives.",
+      "response5": "I can help you analyze the assessment patterns. Would you like me to generate a detailed report on specific areas where students are struggling, or would you prefer suggestions for improvement strategies?"
+    }
+  },
+  "data": {
+    "section": "Section",
+    "assessment": "Assessment",
+    "loading": "Loading assessment data...",
+    "quickSummary": "Quick Summary",
+    "classesProgress": "How your classes are doing",
+    "totalStudents": "Total Students",
+    "assessmentEntries": "Assessment Entries",
+    "status": "Status",
+    "classAssessmentInsights": "Class Assessment Insights",
+    "overall": "Over All",
+    "overallDescription": "See how the gist of assessment data",
+    "totalStudentsOutOf": "Total number of (out of {{count}} students)",
+    "whatDoesThisMean": "What does this mean?",
+    "downloadAssessmentData": "Download Assessment Data",
+    "downloadAssessment1": "Download Assessment 1 (Teacher Report) CSV",
+    "downloadAssessment2": "Download Assessment 2 (Student Self-Assessment) CSV",
+    "downloadParentQuestionnaire": "Download Parent Questionnaire CSV",
+    "downloadDescription": "Download CSV files containing student names, sections, assessment answers, overall scores, and SEL category scores. Parent questionnaire includes additional demographic and behavioral information.",
+    "details": "Details",
+    "detailsDescription": "See each category data",
+    "selSkillCategories": "See how your students are doing in the 8 SEL skill categories:",
+    "selfAwareness": "Self Awareness",
+    "selfManagement": "Self Management",
+    "socialAwareness": "Social Awareness",
+    "relationshipSkills": "Relationship Skills",
+    "responsibleDecisionMaking": "Responsible Decision Making",
+    "metacognition": "Metacognition",
+    "empathy": "Empathy",
+    "criticalThinking": "Critical Thinking",
+    "howCanIMakeItBetter": "How can I make it better?",
+    "understandingCategories": "Understanding the categories",
+    "beginner": "Beginner",
+    "beginnerDescription": "Students who are just starting to learn the concepts.",
+    "growth": "Growth",
+    "growthDescription": "Students who are showing improvement and growth in their understanding.",
+    "expert": "Expert",
+    "expertDescription": "Students who have demonstrated a strong grasp of the concepts and are excelling."
+  },
+  "language": {
+    "english": "English",
+    "arabic": "العربية",
+    "selectLanguage": "Select Language"
+  }
+}
