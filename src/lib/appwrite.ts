@@ -1,5 +1,12 @@
 import { StudentAssessmentRecord, TeacherAssessmentRecord } from "@/types";
-import { Account, Client, Databases, Query, Storage } from "appwrite";
+import {
+  Account,
+  Client,
+  Databases,
+  Query,
+  Storage,
+  OAuthProvider,
+} from "appwrite";
 
 const client = new Client()
   .setEndpoint("https://fra.cloud.appwrite.io/v1")
@@ -97,5 +104,40 @@ export const getParentStudentAssessments = async (
   } catch (error) {
     console.error("Error fetching assessments:", error);
     throw error;
+  }
+};
+
+// Authentication methods
+export const loginWithGoogle = async (
+  successUrl: string,
+  failureUrl: string
+) => {
+  try {
+    await account.createOAuth2Session(
+      OAuthProvider.Google,
+      successUrl,
+      failureUrl
+    );
+  } catch (error) {
+    console.error("Google login failed:", error);
+    throw error;
+  }
+};
+
+export const logoutUser = async () => {
+  try {
+    await account.deleteSession("current");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    throw error;
+  }
+};
+
+export const getCurrentUser = async () => {
+  try {
+    return await account.get();
+  } catch (error) {
+    console.error("Failed to get current user:", error);
+    return null;
   }
 };

@@ -6,6 +6,16 @@
     "show": "Show",
     "hide": "Hide"
   },
+  "auth": {
+    "welcome": "Welcome to Tilli Assessment",
+    "signInDescription": "Please sign in to access your teacher dashboard",
+    "signIn": "Sign In",
+    "useGoogleAccount": "Use your Google account to sign in",
+    "signInWithGoogle": "Sign in with Google",
+    "signingIn": "Signing in...",
+    "secureLogin": "Your login is secure and encrypted",
+    "needHelp": "Need help? Contact your administrator"
+  },
   "dashboard": {
     "title": "Tilli Assessment Dashboard",
     "mainHeading": "SEL Skills Development Tips",

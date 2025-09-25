@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
 import "./globals.css";
 import I18nProvider from "../components/I18nProvider";
+import { AuthProvider } from "../contexts/AuthContext";
 
 const fredoka = Fredoka({ subsets: ["latin"] });
 
@@ -19,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr">
       <body className={`${fredoka.className} bg-gray-50 min-h-screen`}>
-        <I18nProvider>{children}</I18nProvider>
+        <AuthProvider>
+          <I18nProvider>{children}</I18nProvider>
+        </AuthProvider>
       </body>
     </html>
   );
