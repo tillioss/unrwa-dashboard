@@ -17,6 +17,8 @@ export default function LanguagePicker() {
   const currentLanguage =
     languages.find((lang) => lang.code === i18n.language) || languages[0];
 
+  const isRTL = i18n.language === "ar";
+
   const changeLanguage = (languageCode: string) => {
     i18n.changeLanguage(languageCode);
     setIsOpen(false);
@@ -54,7 +56,7 @@ export default function LanguagePicker() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-white hover:bg-white/20 rounded-lg transition-colors duration-200"
+        className="flex items-center gap-2 px-3 py-2 bg-primary-700 text-white hover:bg-primary-700 rounded-lg transition-colors duration-200 shadow-md"
         aria-label={t("language.selectLanguage")}
       >
         <Globe className="w-4 h-4" />
@@ -70,14 +72,18 @@ export default function LanguagePicker() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        <div
+          className={`absolute ${
+            isRTL ? "right-0" : "left-0"
+          } mt-2 w-48 bg-white rounded-lg shadow-xl border border-primary-200 py-1 z-50`}
+        >
           {languages.map((language) => (
             <button
               key={language.code}
               onClick={() => changeLanguage(language.code)}
-              className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors duration-200 flex items-center gap-3 ${
+              className={`w-full text-left px-4 py-2 hover:bg-primary-50 transition-colors duration-200 flex items-center gap-3 ${
                 i18n.language === language.code
-                  ? "bg-blue-50 text-blue-600"
+                  ? "bg-primary-100 text-primary-700 font-semibold"
                   : "text-gray-700"
               }`}
             >

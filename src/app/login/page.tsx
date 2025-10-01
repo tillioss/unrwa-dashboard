@@ -6,11 +6,14 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { LogIn, Loader2 } from "lucide-react";
+import LanguagePicker from "@/components/LanguagePicker";
 
 export default function LoginPage() {
   const { login, loading, isAuthenticated } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
+
+  const isRTL = i18n.language === "ar";
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -32,6 +35,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+      {/* Language Picker */}
+      <div className={`absolute top-4 ${isRTL ? "right-4" : "left-4"}`}>
+        <LanguagePicker />
+      </div>
+
       <div className="max-w-md w-full">
         {/* Logo and Header */}
         <div className="text-center mb-8">
