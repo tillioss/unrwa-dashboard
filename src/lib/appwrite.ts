@@ -1,11 +1,12 @@
-import { StudentAssessmentRecord, TeacherAssessmentRecord } from "@/types";
+import { Score } from "@/types";
+import { TeacherSurvey } from "@/utils/data";
 import {
   Account,
   Client,
   Databases,
+  OAuthProvider,
   Query,
   Storage,
-  OAuthProvider,
 } from "appwrite";
 
 const client = new Client()
@@ -18,96 +19,6 @@ export const storage = new Storage(client);
 
 export { client };
 
-// Database and collection IDs
-export const RUBRICS_COLLECTION_ID =
-  process.env.NEXT_PUBLIC_TEACHER_ASSESSMENT || "";
-const STUDENT_ASSESSMENT_COLLECTION_ID =
-  process.env.NEXT_PUBLIC_STUDENT_ASSESSMENT_ID;
-
-export const getTeacherStudentAssessments = async (
-  grade: string
-): Promise<TeacherAssessmentRecord[]> => {
-  try {
-    const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID;
-    const collectionId = RUBRICS_COLLECTION_ID;
-
-    if (!databaseId) {
-      throw new Error(
-        "Database ID not configured. Please set NEXT_PUBLIC_APPWRITE_DATABASE_ID in your environment variables."
-      );
-    }
-
-    if (!collectionId) {
-      throw new Error(
-        "Collection ID not configured. Please set NEXT_PUBLIC_RUBRICS_COLLECTION_ID in your environment variables."
-      );
-    }
-
-    const response = await databases.listDocuments(databaseId, collectionId, [
-      Query.equal("grade", grade),
-      Query.limit(100),
-    ]);
-
-    return response.documents.map((doc) => ({
-      $id: doc.$id,
-      teacherId: doc.teacherId,
-      teacherName: doc.teacherName,
-      school: doc.school,
-      grade: doc.grade,
-      section: doc.section,
-      date: doc.date,
-      studentName: doc.studentName,
-      assessment: doc.assessment,
-      isManualEntry: doc.isManualEntry,
-      createdAt: doc.createdAt,
-    }));
-  } catch (error) {
-    console.error("Error fetching assessments:", error);
-    throw error;
-  }
-};
-
-export const getParentStudentAssessments = async (
-  grade: string
-): Promise<StudentAssessmentRecord[]> => {
-  try {
-    const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID;
-    const collectionId = STUDENT_ASSESSMENT_COLLECTION_ID;
-
-    if (!databaseId) {
-      throw new Error(
-        "Database ID not configured. Please set NEXT_PUBLIC_APPWRITE_DATABASE_ID in your environment variables."
-      );
-    }
-
-    if (!collectionId) {
-      throw new Error(
-        "Collection ID not configured. Please set NEXT_PUBLIC_RUBRICS_COLLECTION_ID in your environment variables."
-      );
-    }
-
-    const response = await databases.listDocuments(databaseId, collectionId, [
-      Query.equal("grade", grade),
-      Query.limit(100),
-    ]);
-
-    return response.documents.map((doc) => ({
-      $id: doc.$id,
-      school: doc.school,
-      grade: doc.grade,
-      section: doc.section,
-      studentName: doc.studentName,
-      parentQuestionnaire: doc.parentQuestionnaire,
-      assessment: doc.assessment,
-      createdAt: doc.createdAt,
-    }));
-  } catch (error) {
-    console.error("Error fetching assessments:", error);
-    throw error;
-  }
-};
-
-// Authentication methods
 export const loginWithGoogle = async (
   successUrl: string,
   failureUrl: string
@@ -140,4 +51,43 @@ export const getCurrentUser = async () => {
     console.error("Failed to get current user:", error);
     return null;
   }
+};
+
+export const getScores = async ({
+  school,
+  grade,
+  assessment,
+}: {
+  school: string;
+  grade: string;
+  assessment: "child" | "teacher_report";
+}): Promise<Score[]> => {
+  const agg = await databases.listDocuments(
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+    process.env.NEXT_PUBLIC_APPWRITE_SCORES_COLLECTION_ID!,
+    [
+      Query.equal("school", school),
+      Query.equal("grade", grade),
+      Query.equal("assessment", assessment),
+    ]
+  );
+
+  const documents = agg.documents;
+
+  return documents.map((doc) => ({
+    $id: doc.$id,
+    school: doc.school,
+    grade: doc.grade,
+    assessment: doc.assessment,
+    total_students: doc.total_students,
+    testType: doc.testType,
+    overall_level_distribution: JSON.parse(doc.overall_level_distribution),
+    category_level_distributions: JSON.parse(doc.category_level_distributions),
+  }));
+};
+
+export const getTeacherSurveys = async (): Promise<TeacherSurvey> => {
+  return fetch(process.env.NEXT_PUBLIC_TEACHER_SURVEY_API!)
+    .then((res) => res.json())
+    .then((data) => data);
 };
