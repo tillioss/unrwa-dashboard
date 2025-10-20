@@ -25,9 +25,13 @@ import {
   ASSESSMENTS,
   QUICK_SUMMARY_TEXT,
   TeacherSurvey,
+  TeacherSurveyCategory,
   type ProcessedAssessmentData,
+  getSkillLabels,
+  SKILL_DISPLAY_NAMES,
 } from "@/utils/data";
 import ComparisonBarChart from "@/components/ComparisonBarChart";
+import TeacherSurveyBarChart from "@/components/TeacherSurveyBarChart";
 
 const defaultLevels = {
   beginner: 0,
@@ -41,7 +45,7 @@ export default function Dashboard() {
   const [selectedSchool, setSelectedSchool] = useState("School 1");
   const [selectedGrade, setSelectedGrade] = useState("Grade 1");
   const [selectedAssessment, setSelectedAssessment] = useState<
-    "child" | "teacher_report" | "teacher_survey"
+    "child" | "teacher_report" | "teacher_survey" | "parent"
   >("teacher_report");
   const [showQuickSummary, setShowQuickSummary] = useState(true);
   const [showOverallInsights, setShowOverallInsights] = useState(true);
@@ -65,9 +69,53 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Teacher Survey State
+  const [teacherSurveyData, setTeacherSurveyData] =
+    useState<TeacherSurvey | null>(null);
+  const [aggregatedPreSurvey, setAggregatedPreSurvey] =
+    useState<TeacherSurveyCategory | null>(null);
+  const [aggregatedPostSurvey, setAggregatedPostSurvey] =
+    useState<TeacherSurveyCategory | null>(null);
+  const [latestPostTestType, setLatestPostTestType] = useState<string>("");
+
   const schools = ["School 1", "School 2", "School 3"];
   const grades = ["Grade 1"];
   const assessments = ASSESSMENTS;
+
+  // Helper function to aggregate teacher survey data from all schools
+  const aggregateTeacherSurveyData = (
+    testData: Record<string, TeacherSurveyCategory>
+  ): TeacherSurveyCategory => {
+    const aggregated: TeacherSurveyCategory = {
+      sel_importance_belief: {},
+      sel_incorporation_frequency: {},
+      sel_confidence_level: {},
+      sel_performance_frequency: {},
+      disciplinary_issues_frequency: {},
+      student_safety_respect_agreement: {},
+      student_self_awareness_management: {},
+      tilli_curriculum_confidence: {},
+    };
+
+    // Iterate through all schools
+    Object.values(testData).forEach((schoolData) => {
+      // Iterate through all skills
+      Object.keys(aggregated).forEach((skill) => {
+        const skillKey = skill as keyof TeacherSurveyCategory;
+        const schoolSkillData = schoolData[skillKey];
+
+        // Aggregate counts for each response option
+        Object.keys(schoolSkillData).forEach((responseKey) => {
+          if (!aggregated[skillKey][responseKey]) {
+            aggregated[skillKey][responseKey] = 0;
+          }
+          aggregated[skillKey][responseKey] += schoolSkillData[responseKey];
+        });
+      });
+    });
+
+    return aggregated;
+  };
 
   useEffect(() => {
     const fetchAssessmentData = async () => {
@@ -75,8 +123,44 @@ export default function Dashboard() {
       setError(null);
 
       if (selectedAssessment === "teacher_survey") {
-        const data: TeacherSurvey = await getTeacherSurveys();
-        console.log(data);
+        try {
+          const data: TeacherSurvey = await getTeacherSurveys();
+          console.log("Teacher Survey Data:", data);
+          setTeacherSurveyData(data);
+
+          // Aggregate preTest data from all schools
+          if (data.preTest && Object.keys(data.preTest).length > 0) {
+            const aggPre = aggregateTeacherSurveyData(data.preTest);
+            setAggregatedPreSurvey(aggPre);
+          }
+
+          // Find the latest post test with data
+          let latestPost: TeacherSurveyCategory | null = null;
+          let latestType = "";
+
+          if (
+            data.post36WeekTest &&
+            Object.keys(data.post36WeekTest).length > 0
+          ) {
+            latestPost = aggregateTeacherSurveyData(data.post36WeekTest);
+            latestType = "36-Week Post Test";
+          } else if (
+            data.post12WeekTest &&
+            Object.keys(data.post12WeekTest).length > 0
+          ) {
+            latestPost = aggregateTeacherSurveyData(data.post12WeekTest);
+            latestType = "12-Week Post Test";
+          } else if (data.postTest && Object.keys(data.postTest).length > 0) {
+            latestPost = aggregateTeacherSurveyData(data.postTest);
+            latestType = "Post Test";
+          }
+
+          setAggregatedPostSurvey(latestPost);
+          setLatestPostTestType(latestType);
+        } catch (err) {
+          console.error("Error fetching teacher survey data:", err);
+          setError("Failed to load teacher survey data");
+        }
         setLoading(false);
         return;
       }
@@ -84,7 +168,7 @@ export default function Dashboard() {
       const data: Score[] = await getScores({
         school: selectedSchool,
         grade: selectedGrade,
-        assessment: selectedAssessment,
+        assessment: selectedAssessment as "child" | "teacher_report" | "parent",
       });
 
       // Separate PRE and POST data
@@ -286,7 +370,11 @@ export default function Dashboard() {
                 value={selectedAssessment}
                 onChange={(e) =>
                   setSelectedAssessment(
-                    e.target.value as "child" | "teacher_report"
+                    e.target.value as
+                      | "child"
+                      | "teacher_report"
+                      | "teacher_survey"
+                      | "parent"
                   )
                 }
                 className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
@@ -320,479 +408,526 @@ export default function Dashboard() {
           )}
 
           {/* Quick Summary */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-medium text-primary-700">
-                {t("data.quickSummary")}
-              </h2>
-              <button
-                onClick={() => setShowQuickSummary(!showQuickSummary)}
-                className="text-primary-700 hover:text-primary-700"
-              >
-                {showQuickSummary ? t("common.hide") : t("common.show")}
-              </button>
-            </div>
-            {showQuickSummary && (
-              <div className="bg-primary-50 rounded-xl p-4 border border-primary-100">
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {QUICK_SUMMARY_TEXT}
-                </p>
+          {selectedAssessment !== "teacher_survey" && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-medium text-primary-700">
+                  {t("data.quickSummary")}
+                </h2>
+                <button
+                  onClick={() => setShowQuickSummary(!showQuickSummary)}
+                  className="text-primary-700 hover:text-primary-700"
+                >
+                  {showQuickSummary ? t("common.hide") : t("common.show")}
+                </button>
               </div>
-            )}
-          </div>
-
-          {/* Assessment Tracker */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-medium text-primary-700 mb-4">
-              {t("data.classesProgress")}
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      Grade
-                    </th>
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      {t("data.totalStudents")}
-                    </th>
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      {t("data.assessmentEntries")}
-                    </th>
-                    <th className="text-left py-2 px-2 font-medium text-gray-700">
-                      {t("data.status")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    const totalStudents = 76;
-                    const entries = 72;
-
-                    const getStatus = (total: number, completed: number) => {
-                      if (completed === 0) return "pending";
-                      if (completed === total) return "completed";
-                      return "ongoing";
-                    };
-
-                    const status = getStatus(totalStudents, entries);
-
-                    return (
-                      <tr className="border-b border-gray-100">
-                        <td className="py-3 px-2 font-medium text-gray-900">
-                          Grade 1
-                        </td>
-                        <td className="py-3 px-2 text-gray-600">
-                          {totalStudents}
-                        </td>
-                        <td className="py-3 px-2 text-gray-600">{entries}</td>
-                        <td className="py-2">
-                          <StatusBadge status={status} />
-                        </td>
-                      </tr>
-                    );
-                  })()}
-                </tbody>
-              </table>
+              {showQuickSummary && (
+                <div className="bg-primary-50 rounded-xl p-4 border border-primary-100">
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {QUICK_SUMMARY_TEXT}
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
-          {/* Assessment Insights */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-medium text-primary-700 mb-4">
-              {t("data.classAssessmentInsights")}
-            </h2>
-
-            {/* Overall Section */}
-            <div className="mb-6">
-              <button
-                onClick={() => setShowOverallInsights(!showOverallInsights)}
-                className="flex items-center gap-2 text-primary-600 font-medium mb-3"
-              >
-                {showOverallInsights ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
+          {/* Teacher Survey View */}
+          {selectedAssessment === "teacher_survey" && aggregatedPreSurvey && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="mb-6">
+                <h2 className="text-lg font-medium text-primary-700 mb-2">
+                  Teacher Survey Results
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Comparing Pre-Test{" "}
+                  {aggregatedPostSurvey && `to ${latestPostTestType}`}
+                </p>
+                {!aggregatedPostSurvey && (
+                  <p className="text-sm text-amber-600 mt-2">
+                    No post-test data available yet. Showing pre-test data only.
+                  </p>
                 )}
-                {t("data.overall")}:
-              </button>
-              {showOverallInsights && (
-                <div className="ml-6 space-y-4">
-                  <p className="text-gray-600 text-sm">
-                    {t("data.overallDescription")}
-                  </p>
-                  <p className="text-gray-700 font-medium">
-                    {t("data.totalStudentsOutOf", {
-                      count: hasPostTest
-                        ? preTestData.totalStudents +
-                          postTestData!.totalStudents
-                        : preTestData.totalStudents,
-                    })}
-                    :
-                  </p>
+              </div>
 
-                  <div className="flex gap-4">
-                    <CategoryCircle
-                      category="beginner"
-                      count={overallData.beginner}
-                      size="md"
-                    />
-                    <CategoryCircle
-                      category="growth"
-                      count={overallData.growth}
-                      size="md"
-                    />
-                    <CategoryCircle
-                      category="expert"
-                      count={overallData.expert}
-                      size="md"
-                    />
-                  </div>
+              <div className="space-y-8">
+                {Object.keys(aggregatedPreSurvey).map((skillKey) => {
+                  const skill = skillKey as keyof TeacherSurveyCategory;
+                  const preData = aggregatedPreSurvey[skill];
+                  const postData = aggregatedPostSurvey?.[skill] || {};
+                  const labels = getSkillLabels(skill);
+                  const displayName = SKILL_DISPLAY_NAMES[skill];
 
-                  {/* Show comparison chart if POST data is available */}
-                  {hasPostTest && (
-                    <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-4">
-                        See how your students are doing in the{" "}
-                        <strong>2 categories</strong>:
-                      </p>
-                      <ComparisonBarChart
-                        preData={preTestData.overall}
-                        postData={postTestData!.overall}
+                  return (
+                    <div key={skill} className="bg-gray-50 rounded-lg p-4">
+                      <TeacherSurveyBarChart
+                        preData={preData}
+                        postData={postData}
+                        labels={labels}
+                        skillName={displayName}
                       />
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Assessment Tracker - Hide for teacher survey */}
+          {selectedAssessment !== "teacher_survey" && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-medium text-primary-700 mb-4">
+                {t("data.classesProgress")}
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        Grade
+                      </th>
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        {t("data.totalStudents")}
+                      </th>
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        {t("data.assessmentEntries")}
+                      </th>
+                      <th className="text-left py-2 px-2 font-medium text-gray-700">
+                        {t("data.status")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      const totalStudents = 76;
+                      const entries = 72;
+
+                      const getStatus = (total: number, completed: number) => {
+                        if (completed === 0) return "pending";
+                        if (completed === total) return "completed";
+                        return "ongoing";
+                      };
+
+                      const status = getStatus(totalStudents, entries);
+
+                      return (
+                        <tr className="border-b border-gray-100">
+                          <td className="py-3 px-2 font-medium text-gray-900">
+                            Grade 1
+                          </td>
+                          <td className="py-3 px-2 text-gray-600">
+                            {totalStudents}
+                          </td>
+                          <td className="py-3 px-2 text-gray-600">{entries}</td>
+                          <td className="py-2">
+                            <StatusBadge status={status} />
+                          </td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Assessment Insights - Hide for teacher survey */}
+          {selectedAssessment !== "teacher_survey" && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-medium text-primary-700 mb-4">
+                {t("data.classAssessmentInsights")}
+              </h2>
+
+              {/* Overall Section */}
+              <div className="mb-6">
+                <button
+                  onClick={() => setShowOverallInsights(!showOverallInsights)}
+                  className="flex items-center gap-2 text-primary-600 font-medium mb-3"
+                >
+                  {showOverallInsights ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
                   )}
+                  {t("data.overall")}:
+                </button>
+                {showOverallInsights && (
+                  <div className="ml-6 space-y-4">
+                    <p className="text-gray-600 text-sm">
+                      {t("data.overallDescription")}
+                    </p>
+                    <p className="text-gray-700 font-medium">
+                      {t("data.totalStudentsOutOf", {
+                        count: hasPostTest
+                          ? preTestData.totalStudents +
+                            postTestData!.totalStudents
+                          : preTestData.totalStudents,
+                      })}
+                      :
+                    </p>
 
-                  <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
-                    <Star className="w-4 h-4 text-primary-500" />
-                    {t("data.whatDoesThisMean")}
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Details Section */}
-            <div>
-              <button
-                onClick={() => setShowDetails(!showDetails)}
-                className="flex items-center gap-2 text-primary-600 font-medium mb-3"
-              >
-                {showDetails ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-                {t("data.details")}:
-              </button>
-              {showDetails && (
-                <div className="ml-6 space-y-6">
-                  <p className="text-gray-600 text-sm">
-                    {t("data.detailsDescription")}
-                  </p>
-                  <p className="text-gray-700 font-medium">
-                    {t("data.selSkillCategories")}
-                  </p>
-
-                  {/* SEL Skill Categories Grid */}
-                  <div className="space-y-8">
-                    {/* Self Awareness */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.selfAwareness")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={selfAwarenessData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={selfAwarenessData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={selfAwarenessData.expert}
-                          size="md"
-                        />
-                      </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.selfAwareness}
-                            postData={postTestData!.selfAwareness}
-                          />
-                        </div>
-                      )}
+                    <div className="flex gap-4">
+                      <CategoryCircle
+                        category="beginner"
+                        count={overallData.beginner}
+                        size="md"
+                      />
+                      <CategoryCircle
+                        category="growth"
+                        count={overallData.growth}
+                        size="md"
+                      />
+                      <CategoryCircle
+                        category="expert"
+                        count={overallData.expert}
+                        size="md"
+                      />
                     </div>
 
-                    {/* Self Management */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.selfManagement")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={selfManagementData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={selfManagementData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={selfManagementData.expert}
-                          size="md"
+                    {/* Show comparison chart if POST data is available */}
+                    {hasPostTest && (
+                      <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                        <p className="text-sm text-gray-600 mb-4">
+                          See how your students are doing in the{" "}
+                          <strong>2 categories</strong>:
+                        </p>
+                        <ComparisonBarChart
+                          preData={preTestData.overall}
+                          postData={postTestData!.overall}
                         />
                       </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.selfManagement}
-                            postData={postTestData!.selfManagement}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    )}
 
-                    {/* Social Awareness */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.socialAwareness")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={socialAwarenessData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={socialAwarenessData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={socialAwarenessData.expert}
-                          size="md"
-                        />
-                      </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.socialAwareness}
-                            postData={postTestData!.socialAwareness}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Relationship Skills */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.relationshipSkills")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={relationshipSkillsData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={relationshipSkillsData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={relationshipSkillsData.expert}
-                          size="md"
-                        />
-                      </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.relationshipSkills}
-                            postData={postTestData!.relationshipSkills}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Responsible Decision Making */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.responsibleDecisionMaking")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={responsibleDecisionMakingData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={responsibleDecisionMakingData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={responsibleDecisionMakingData.expert}
-                          size="md"
-                        />
-                      </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.responsibleDecisionMaking}
-                            postData={postTestData!.responsibleDecisionMaking}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Metacognition */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.metacognition")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={metacognitionData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={metacognitionData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={metacognitionData.expert}
-                          size="md"
-                        />
-                      </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.metacognition}
-                            postData={postTestData!.metacognition}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Empathy */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.empathy")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={empathyData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={empathyData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={empathyData.expert}
-                          size="md"
-                        />
-                      </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.empathy}
-                            postData={postTestData!.empathy}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Critical Thinking */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                        {t("data.criticalThinking")}
-                      </h4>
-                      <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                        <CategoryCircle
-                          category="beginner"
-                          count={criticalThinkingData.beginner}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="growth"
-                          count={criticalThinkingData.growth}
-                          size="md"
-                        />
-                        <CategoryCircle
-                          category="expert"
-                          count={criticalThinkingData.expert}
-                          size="md"
-                        />
-                      </div>
-                      {hasPostTest && (
-                        <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
-                          <ComparisonBarChart
-                            preData={preTestData.criticalThinking}
-                            postData={postTestData!.criticalThinking}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
+                      <Star className="w-4 h-4 text-primary-500" />
+                      {t("data.whatDoesThisMean")}
+                    </button>
                   </div>
+                )}
+              </div>
 
-                  <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
-                    <Star className="w-4 h-4 text-primary-500" />
-                    {t("data.howCanIMakeItBetter")}
-                  </button>
-                </div>
-              )}
-            </div>
+              {/* Details Section */}
+              <div>
+                <button
+                  onClick={() => setShowDetails(!showDetails)}
+                  className="flex items-center gap-2 text-primary-600 font-medium mb-3"
+                >
+                  {showDetails ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
+                  {t("data.details")}:
+                </button>
+                {showDetails && (
+                  <div className="ml-6 space-y-6">
+                    <p className="text-gray-600 text-sm">
+                      {t("data.detailsDescription")}
+                    </p>
+                    <p className="text-gray-700 font-medium">
+                      {t("data.selSkillCategories")}
+                    </p>
 
-            {/* Category Definitions */}
-            <div className="mt-6 pt-4 border-t border-gray-200">
-              <h3 className="font-medium text-gray-900 mb-3">
-                {t("data.understandingCategories")}:
-              </h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <span>
-                    <strong className="text-[#EF4444]">
-                      {t("data.beginner")}:
-                    </strong>{" "}
-                    {t("data.beginnerDescription")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span>
-                    <strong className="text-[#3B82F6]">
-                      {t("data.growth")}:
-                    </strong>{" "}
-                    {t("data.growthDescription")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span>
-                    <strong className="text-[#22C55E]">
-                      {t("data.expert")}:
-                    </strong>{" "}
-                    {t("data.expertDescription")}
-                  </span>
-                </li>
-              </ul>
+                    {/* SEL Skill Categories Grid */}
+                    <div className="space-y-8">
+                      {/* Self Awareness */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.selfAwareness")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={selfAwarenessData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={selfAwarenessData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={selfAwarenessData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.selfAwareness}
+                              postData={postTestData!.selfAwareness}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Self Management */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.selfManagement")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={selfManagementData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={selfManagementData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={selfManagementData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.selfManagement}
+                              postData={postTestData!.selfManagement}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Social Awareness */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.socialAwareness")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={socialAwarenessData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={socialAwarenessData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={socialAwarenessData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.socialAwareness}
+                              postData={postTestData!.socialAwareness}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Relationship Skills */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.relationshipSkills")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={relationshipSkillsData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={relationshipSkillsData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={relationshipSkillsData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.relationshipSkills}
+                              postData={postTestData!.relationshipSkills}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Responsible Decision Making */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.responsibleDecisionMaking")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={responsibleDecisionMakingData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={responsibleDecisionMakingData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={responsibleDecisionMakingData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.responsibleDecisionMaking}
+                              postData={postTestData!.responsibleDecisionMaking}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Metacognition */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.metacognition")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={metacognitionData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={metacognitionData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={metacognitionData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.metacognition}
+                              postData={postTestData!.metacognition}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Empathy */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.empathy")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={empathyData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={empathyData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={empathyData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.empathy}
+                              postData={postTestData!.empathy}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Critical Thinking */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                          {t("data.criticalThinking")}
+                        </h4>
+                        <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                          <CategoryCircle
+                            category="beginner"
+                            count={criticalThinkingData.beginner}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="growth"
+                            count={criticalThinkingData.growth}
+                            size="md"
+                          />
+                          <CategoryCircle
+                            category="expert"
+                            count={criticalThinkingData.expert}
+                            size="md"
+                          />
+                        </div>
+                        {hasPostTest && (
+                          <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                            <ComparisonBarChart
+                              preData={preTestData.criticalThinking}
+                              postData={postTestData!.criticalThinking}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
+                      <Star className="w-4 h-4 text-primary-500" />
+                      {t("data.howCanIMakeItBetter")}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Category Definitions */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <h3 className="font-medium text-gray-900 mb-3">
+                  {t("data.understandingCategories")}:
+                </h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span>
+                      <strong className="text-[#EF4444]">
+                        {t("data.beginner")}:
+                      </strong>{" "}
+                      {t("data.beginnerDescription")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span>
+                      <strong className="text-[#3B82F6]">
+                        {t("data.growth")}:
+                      </strong>{" "}
+                      {t("data.growthDescription")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span>
+                      <strong className="text-[#22C55E]">
+                        {t("data.expert")}:
+                      </strong>{" "}
+                      {t("data.expertDescription")}
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Mobile Navigation */}

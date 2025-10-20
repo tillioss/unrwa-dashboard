@@ -60,7 +60,7 @@ export const getScores = async ({
 }: {
   school: string;
   grade: string;
-  assessment: "child" | "teacher_report";
+  assessment: "child" | "teacher_report" | "parent";
 }): Promise<Score[]> => {
   const agg = await databases.listDocuments(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,

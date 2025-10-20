@@ -8,7 +8,7 @@ export interface Score {
   $id: string;
   school: string;
   grade: string;
-  assessment: "child" | "teacher_report";
+  assessment: "child" | "teacher_report" | "parent";
   total_students: number;
   testType: "PRE" | "POST";
   overall_level_distribution: LevelDistribution;
