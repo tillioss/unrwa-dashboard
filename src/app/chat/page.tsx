@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import {
   Send,
-  ArrowLeft,
   Bot,
   User,
   Star,
@@ -12,12 +11,16 @@ import {
   BarChart3,
   LogOut,
   User as UserIcon,
+  PlusCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import ReactMarkdown from "react-markdown";
 import LanguagePicker from "../../components/LanguagePicker";
 import ProtectedRoute from "../../components/ProtectedRoute";
 import { useAuth } from "../../contexts/AuthContext";
+import { getAllScores } from "../../lib/appwrite";
+import { Score } from "../../types";
 
 interface Message {
   id: string;
@@ -29,17 +32,44 @@ interface Message {
 export default function ChatPage() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: t("chat.welcomeMessage"),
-      sender: "ai",
-      timestamp: new Date(),
-    },
-  ]);
+
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("chat");
+      if (stored) {
+        const parsedMessages = JSON.parse(stored);
+        return parsedMessages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+      }
+    }
+    return [
+      {
+        id: "1",
+        text: t("chat.welcomeMessage"),
+        sender: "ai",
+        timestamp: new Date(),
+      },
+    ];
+  });
+
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [assessmentScores, setAssessmentScores] = useState<Score[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getAllScores().then((scores: Score[]) => {
+      setAssessmentScores(scores);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("chat", JSON.stringify(messages));
+    }
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -59,12 +89,40 @@ export default function ChatPage() {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
+    const currentInput = inputText;
     setInputText("");
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_CHAT_API_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: currentInput,
+          scores: assessmentScores,
+          history: newMessages.map((m) => ({
+            role: m.sender === "user" ? "user" : "bot",
+            text: m.text,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.message || "Sorry, I couldn't generate a response.",
+        sender: "ai",
+        timestamp: new Date(),
+      };
+
+      setMessages([...newMessages, aiMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+
+      // Fallback to simulated response if API fails
       const aiResponses = [
         t("chat.responses.response1"),
         t("chat.responses.response2"),
@@ -83,9 +141,24 @@ export default function ChatPage() {
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages([...newMessages, aiMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
+  };
+
+  const handleStartNewChat = () => {
+    const welcomeMessage: Message = {
+      id: "1",
+      text: t("chat.welcomeMessage"),
+      sender: "ai",
+      timestamp: new Date(),
+    };
+    setMessages([welcomeMessage]);
+    setInputText("");
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("chat");
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -122,6 +195,14 @@ export default function ChatPage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <button
+                onClick={handleStartNewChat}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                title="Start New Chat"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">New Chat</span>
+              </button>
               <LanguagePicker />
               {user && (
                 <div className="flex items-center gap-3">
@@ -167,7 +248,13 @@ export default function ChatPage() {
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="text-sm leading-relaxed">{message.text}</p>
+                    {message.sender === "ai" ? (
+                      <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-900 prose-strong:text-gray-900 prose-ul:text-gray-900 prose-ol:text-gray-900 prose-li:text-gray-900 prose-code:text-gray-900 prose-pre:bg-gray-100 prose-pre:text-gray-900">
+                        <ReactMarkdown>{message.text}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed">{message.text}</p>
+                    )}
                     <p
                       className={`text-xs mt-2 ${
                         message.sender === "user"
@@ -224,7 +311,7 @@ export default function ChatPage() {
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={t("chat.inputPlaceholder")}
-                className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none shadow-sm"
+                className="w-full text-black px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none shadow-sm"
                 rows={3}
                 style={{ minHeight: "48px", maxHeight: "120px" }}
               />
@@ -235,7 +322,7 @@ export default function ChatPage() {
             <button
               onClick={handleSendMessage}
               disabled={!inputText.trim() || isTyping}
-              className="px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center shadow-sm"
+              className="px-4 py-3 bg-primary-600 rounded-xl hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center shadow-sm"
             >
               <Send className="w-4 h-4" />
             </button>

@@ -86,6 +86,24 @@ export const getScores = async ({
   }));
 };
 
+export const getAllScores = async (): Promise<Score[]> => {
+  const agg = await databases.listDocuments(
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+    process.env.NEXT_PUBLIC_APPWRITE_SCORES_COLLECTION_ID!
+  );
+
+  return agg.documents.map((doc) => ({
+    $id: doc.$id,
+    school: doc.school,
+    grade: doc.grade,
+    assessment: doc.assessment,
+    total_students: doc.total_students,
+    testType: doc.testType,
+    overall_level_distribution: JSON.parse(doc.overall_level_distribution),
+    category_level_distributions: JSON.parse(doc.category_level_distributions),
+  }));
+};
+
 export const getTeacherSurveys = async (): Promise<TeacherSurvey> => {
   return fetch(process.env.NEXT_PUBLIC_TEACHER_SURVEY_API!)
     .then((res) => res.json())
