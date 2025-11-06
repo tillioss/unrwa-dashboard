@@ -1,4 +1,6 @@
-# UNWRA Dashboard
+[![Coverage Status](https://coveralls.io/repos/github/tillioss/unrwa-dashboard/badge.svg?branch=main)](https://coveralls.io/github/tillioss/unrwa-dashboard?branch=main)
+
+# Admin Dashboard
 
 A comprehensive dashboard for teachers to monitor student assessments and progress, with support for English and Arabic languages.
 
