@@ -8,10 +8,8 @@ import {
   Star,
   Home,
   MessageCircle,
-  BarChart3,
   LogOut,
   User as UserIcon,
-  PlusCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
@@ -197,11 +195,10 @@ export default function ChatPage() {
             <div className="flex items-center gap-4">
               <button
                 onClick={handleStartNewChat}
-                className="flex items-center gap-2 px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                title="Start New Chat"
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-primary-700 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                title={t("chat.clearChat")}
               >
-                <PlusCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">New Chat</span>
+                <span className="hidden sm:inline">{t("chat.clearChat")}</span>
               </button>
               <LanguagePicker />
               {user && (
@@ -323,6 +320,8 @@ export default function ChatPage() {
               onClick={handleSendMessage}
               disabled={!inputText.trim() || isTyping}
               className="px-4 py-3 bg-primary-600 rounded-xl hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center shadow-sm"
+              aria-label={t("chat.sendMessage")}
+              title={t("chat.sendMessage")}
             >
               <Send className="w-4 h-4" />
             </button>
@@ -343,15 +342,6 @@ export default function ChatPage() {
               <MessageCircle className="w-6 h-6 text-primary-600" />
               <span className="text-xs text-primary-600 font-medium">
                 {t("common.aiChat")}
-              </span>
-            </Link>
-            <Link
-              href="/data"
-              className="flex flex-col items-center gap-1 py-2"
-            >
-              <BarChart3 className="w-6 h-6 text-gray-400" />
-              <span className="text-xs text-gray-400">
-                {t("common.dataView")}
               </span>
             </Link>
           </div>

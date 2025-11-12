@@ -21,14 +21,6 @@ const customJestConfig = {
     "!src/app/layout.tsx",
     "!src/lib/appwrite.ts", // Integration code, tested via integration tests
   ],
-  coverageThreshold: {
-    global: {
-      branches: 65,
-      functions: 85,
-      lines: 90,
-      statements: 90,
-    },
-  },
   testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
 };
 

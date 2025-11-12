@@ -12,6 +12,9 @@ import { getAllScores } from "@/lib/appwrite";
 // Mock AuthContext
 const mockLogout = jest.fn();
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+const mockGetAllScores = getAllScores as jest.MockedFunction<
+  typeof getAllScores
+>;
 jest.mock("@/contexts/AuthContext", () => ({
   useAuth: jest.fn(),
 }));
@@ -23,25 +26,34 @@ jest.mock("@/lib/appwrite", () => ({
 
 // Mock react-i18next
 jest.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        "chat.title": "AI Assistant",
-        "chat.subtitle": "Ask me anything",
-        "chat.welcomeMessage": "Hello! I'm your AI assistant.",
-        "chat.inputPlaceholder": "Ask me about...",
-        "chat.responses.response1": "Response 1",
-        "chat.responses.response2": "Response 2",
-        "chat.responses.response3": "Response 3",
-        "chat.responses.response4": "Response 4",
-        "chat.responses.response5": "Response 5",
-        "common.home": "Home",
-        "common.aiChat": "AI Chat",
-        "common.dataView": "Data View",
-      };
-      return translations[key] || key;
-    },
-  }),
+  useTranslation: () => {
+    const translations: Record<string, string> = {
+      "chat.title": "Ask Tilli",
+      "chat.subtitle": "Ask me anything about your students",
+      "chat.welcomeMessage":
+        "Hello! I'm your AI assistant. I can help you with questions about your students' assessments, provide insights on their progress, and suggest teaching strategies. What would you like to know?",
+      "chat.inputPlaceholder":
+        "Ask me about your students' assessments, progress, or teaching strategies...",
+      "chat.clearChat": "Clear Chat",
+      "chat.sendMessage": "Send Message",
+      "chat.responses.response1": "Response 1",
+      "chat.responses.response2": "Response 2",
+      "chat.responses.response3": "Response 3",
+      "chat.responses.response4": "Response 4",
+      "chat.responses.response5": "Response 5",
+      "common.home": "Home",
+      "common.aiChat": "Ask Tilli",
+    };
+
+    return {
+      t: (key: string) => translations[key] || key,
+      i18n: {
+        language: "en",
+        changeLanguage: jest.fn(),
+      },
+      ready: true,
+    };
+  },
 }));
 
 // Mock ProtectedRoute
@@ -75,12 +87,13 @@ global.fetch = jest.fn();
 describe("ChatPage", () => {
   beforeEach(() => {
     mockLogout.mockClear();
-    (getAllScores as jest.Mock).mockResolvedValue([]);
+    mockGetAllScores.mockClear();
+    mockGetAllScores.mockResolvedValue([]);
     (global.fetch as jest.Mock).mockClear();
     sessionStorage.clear();
   });
 
-  it("renders chat page with welcome message", () => {
+  it("renders chat page with welcome message", async () => {
     mockUseAuth.mockReturnValue({
       user: {
         $id: "1",
@@ -96,8 +109,14 @@ describe("ChatPage", () => {
     });
 
     render(<ChatPage />);
+
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
     expect(
-      screen.getByText("Hello! I'm your AI assistant.")
+      screen.getByText((content) =>
+        content.startsWith("Hello! I'm your AI assistant.")
+      )
     ).toBeInTheDocument();
   });
 
@@ -120,13 +139,18 @@ describe("ChatPage", () => {
     });
 
     render(<ChatPage />);
-    const textarea = screen.getByPlaceholderText("Ask me about...");
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+    const textarea = screen.getByPlaceholderText(
+      "Ask me about your students' assessments, progress, or teaching strategies..."
+    );
 
     await act(async () => {
       fireEvent.change(textarea, { target: { value: "Test message" } });
     });
 
-    const sendButton = screen.getByRole("button", { name: "" });
+    const sendButton = screen.getByRole("button", { name: "Send Message" });
 
     await act(async () => {
       fireEvent.click(sendButton);
@@ -154,10 +178,15 @@ describe("ChatPage", () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error("API Error"));
 
     render(<ChatPage />);
-    const textarea = screen.getByPlaceholderText("Ask me about...");
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+    const textarea = screen.getByPlaceholderText(
+      "Ask me about your students' assessments, progress, or teaching strategies..."
+    );
     fireEvent.change(textarea, { target: { value: "Test" } });
 
-    const sendButton = screen.getByRole("button", { name: "" });
+    const sendButton = screen.getByRole("button", { name: "Send Message" });
     fireEvent.click(sendButton);
 
     // Should show fallback response
@@ -174,7 +203,7 @@ describe("ChatPage", () => {
     });
   });
 
-  it("starts new chat when button is clicked", () => {
+  it("starts new chat when button is clicked", async () => {
     mockUseAuth.mockReturnValue({
       user: {
         $id: "1",
@@ -190,15 +219,20 @@ describe("ChatPage", () => {
     });
 
     render(<ChatPage />);
-    const newChatButton = screen.getByText("New Chat");
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+    const newChatButton = screen.getByTitle("Clear Chat");
     fireEvent.click(newChatButton);
 
     expect(
-      screen.getByText("Hello! I'm your AI assistant.")
+      screen.getByText((content) =>
+        content.startsWith("Hello! I'm your AI assistant.")
+      )
     ).toBeInTheDocument();
   });
 
-  it("renders navigation links", () => {
+  it("renders navigation links", async () => {
     mockUseAuth.mockReturnValue({
       user: {
         $id: "1",
@@ -214,8 +248,10 @@ describe("ChatPage", () => {
     });
 
     render(<ChatPage />);
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
     expect(screen.getByText("Home")).toBeInTheDocument();
-    expect(screen.getByText("AI Chat")).toBeInTheDocument();
-    expect(screen.getByText("Data View")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ask Tilli" })).toBeInTheDocument();
   });
 });

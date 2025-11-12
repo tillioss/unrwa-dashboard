@@ -1,57 +1,306 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Star,
   BookOpen,
-  Users,
-  TrendingUp,
+  ChevronDown,
+  ChevronRight,
   Home,
-  MessageCircle,
-  BarChart3,
   LogOut,
+  MessageCircle,
+  Star,
+  TrendingUp,
+  Users,
   User,
 } from "lucide-react";
-import Link from "next/link";
-import { useTranslation } from "react-i18next";
-import LanguagePicker from "../components/LanguagePicker";
-import ProtectedRoute from "../components/ProtectedRoute";
-import { useAuth } from "../contexts/AuthContext";
+import LanguagePicker from "@/components/LanguagePicker";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import StatusBadge from "@/components/StatusBadge";
+import CategoryCircle from "@/components/CategoryCircle";
+import ComparisonBarChart from "@/components/ComparisonBarChart";
+import TeacherSurveyBarChart from "@/components/TeacherSurveyBarChart";
+import { getScores, getTeacherSurveys } from "@/lib/appwrite";
+import { Score } from "@/types";
+import {
+  ASSESSMENTS,
+  QUICK_SUMMARY_TEXT,
+  TeacherSurvey,
+  TeacherSurveyCategory,
+  type ProcessedAssessmentData,
+  getSkillLabels,
+  SKILL_DISPLAY_NAMES,
+} from "@/utils/data";
+
+const defaultLevels = {
+  beginner: 0,
+  growth: 0,
+  expert: 0,
+};
 
 export default function Dashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
+  const [selectedSchool, setSelectedSchool] = useState("School 1");
+  const [selectedGrade, setSelectedGrade] = useState("Grade 1");
+  const [selectedAssessment, setSelectedAssessment] = useState<
+    "child" | "teacher_report" | "teacher_survey" | "parent"
+  >("teacher_report");
+  const [showQuickSummary, setShowQuickSummary] = useState(true);
+  const [showOverallInsights, setShowOverallInsights] = useState(true);
+  const [showDetails, setShowDetails] = useState(false);
+  const [preTestData, setPreTestData] = useState<ProcessedAssessmentData>({
+    overall: { beginner: 0, growth: 0, expert: 0 },
+    selfAwareness: { beginner: 0, growth: 0, expert: 0 },
+    selfManagement: { beginner: 0, growth: 0, expert: 0 },
+    socialAwareness: { beginner: 0, growth: 0, expert: 0 },
+    relationshipSkills: { beginner: 0, growth: 0, expert: 0 },
+    responsibleDecisionMaking: { beginner: 0, growth: 0, expert: 0 },
+    metacognition: { beginner: 0, growth: 0, expert: 0 },
+    empathy: { beginner: 0, growth: 0, expert: 0 },
+    criticalThinking: { beginner: 0, growth: 0, expert: 0 },
+    totalStudents: 0,
+  });
+  const [postTestData, setPostTestData] =
+    useState<ProcessedAssessmentData | null>(null);
+  const [hasPostTest, setHasPostTest] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const allTips = [
-    {
-      title: t("tips.nameItToTameIt.title"),
-      icon: <Star className="w-5 h-5 text-yellow-500" />,
-      content: t("tips.nameItToTameIt.content"),
-      color: "bg-white border-yellow-200",
-    },
-    {
-      title: t("tips.keepRoutinesPredictable.title"),
-      icon: <Users className="w-5 h-5 text-blue-500" />,
-      content: t("tips.keepRoutinesPredictable.content"),
-      color: "bg-white border-blue-200",
-    },
-    {
-      title: t("tips.growTheirFeelingWords.title"),
-      icon: <BookOpen className="w-5 h-5 text-green-500" />,
-      content: t("tips.growTheirFeelingWords.content"),
-      color: "bg-white border-green-200",
-    },
-    {
-      title: t("tips.checkInOneToOne.title"),
-      icon: <TrendingUp className="w-5 h-5 text-purple-500" />,
-      content: t("tips.checkInOneToOne.content"),
-      color: "bg-white border-purple-200",
-    },
-  ];
+  // Teacher Survey State
+  const [aggregatedPreSurvey, setAggregatedPreSurvey] =
+    useState<TeacherSurveyCategory | null>(null);
+  const [aggregatedPostSurvey, setAggregatedPostSurvey] =
+    useState<TeacherSurveyCategory | null>(null);
+  const [latestPostTestType, setLatestPostTestType] = useState<string>("");
 
-  // Select one random tip
-  const randomIndex = Math.floor(Math.random() * allTips.length);
-  const tips = [allTips[randomIndex]];
+  const schools = ["School 1", "School 2", "School 3"];
+  const grades = ["Grade 1"];
+  const assessments = ASSESSMENTS;
+
+  const tips = useMemo(() => {
+    const tipList = [
+      {
+        title: t("tips.nameItToTameIt.title"),
+        icon: <Star className="w-5 h-5 text-yellow-500" />,
+        content: t("tips.nameItToTameIt.content"),
+        color: "bg-white border-yellow-200",
+      },
+      {
+        title: t("tips.keepRoutinesPredictable.title"),
+        icon: <Users className="w-5 h-5 text-blue-500" />,
+        content: t("tips.keepRoutinesPredictable.content"),
+        color: "bg-white border-blue-200",
+      },
+      {
+        title: t("tips.growTheirFeelingWords.title"),
+        icon: <BookOpen className="w-5 h-5 text-green-500" />,
+        content: t("tips.growTheirFeelingWords.content"),
+        color: "bg-white border-green-200",
+      },
+      {
+        title: t("tips.checkInOneToOne.title"),
+        icon: <TrendingUp className="w-5 h-5 text-purple-500" />,
+        content: t("tips.checkInOneToOne.content"),
+        color: "bg-white border-purple-200",
+      },
+    ];
+    const randomIndex = Math.floor(Math.random() * tipList.length);
+    return [tipList[randomIndex]];
+  }, [t, i18n.language]);
+
+  // Helper function to aggregate teacher survey data from all schools
+  const aggregateTeacherSurveyData = (
+    testData: Record<string, TeacherSurveyCategory>
+  ): TeacherSurveyCategory => {
+    const aggregated: TeacherSurveyCategory = {
+      sel_importance_belief: {},
+      sel_incorporation_frequency: {},
+      sel_confidence_level: {},
+      sel_performance_frequency: {},
+      disciplinary_issues_frequency: {},
+      student_safety_respect_agreement: {},
+      student_self_awareness_management: {},
+      tilli_curriculum_confidence: {},
+    };
+
+    Object.values(testData).forEach((schoolData) => {
+      Object.keys(aggregated).forEach((skill) => {
+        const skillKey = skill as keyof TeacherSurveyCategory;
+        const schoolSkillData = schoolData[skillKey];
+
+        Object.keys(schoolSkillData).forEach((responseKey) => {
+          if (!aggregated[skillKey][responseKey]) {
+            aggregated[skillKey][responseKey] = 0;
+          }
+          aggregated[skillKey][responseKey] += schoolSkillData[responseKey];
+        });
+      });
+    });
+
+    return aggregated;
+  };
+
+  useEffect(() => {
+    const fetchAssessmentData = async () => {
+      setLoading(true);
+      setError(null);
+
+      if (selectedAssessment === "teacher_survey") {
+        try {
+          const data: TeacherSurvey = await getTeacherSurveys();
+
+          if (data.preTest && Object.keys(data.preTest).length > 0) {
+            const aggPre = aggregateTeacherSurveyData(data.preTest);
+            setAggregatedPreSurvey(aggPre);
+          }
+
+          let latestPost: TeacherSurveyCategory | null = null;
+          let latestType = "";
+
+          if (
+            data.post36WeekTest &&
+            Object.keys(data.post36WeekTest).length > 0
+          ) {
+            latestPost = aggregateTeacherSurveyData(data.post36WeekTest);
+            latestType = "36-Week Post Test";
+          } else if (
+            data.post12WeekTest &&
+            Object.keys(data.post12WeekTest).length > 0
+          ) {
+            latestPost = aggregateTeacherSurveyData(data.post12WeekTest);
+            latestType = "12-Week Post Test";
+          } else if (data.postTest && Object.keys(data.postTest).length > 0) {
+            latestPost = aggregateTeacherSurveyData(data.postTest);
+            latestType = "Post Test";
+          }
+
+          setAggregatedPostSurvey(latestPost);
+          setLatestPostTestType(latestType);
+        } catch (err) {
+          console.error("Error fetching teacher survey data:", err);
+          setError("Failed to load teacher survey data");
+        }
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const data: Score[] = await getScores({
+          school: selectedSchool,
+          grade: selectedGrade,
+          assessment: selectedAssessment as
+            | "child"
+            | "teacher_report"
+            | "parent",
+        });
+
+        const preData = data.find((item) => item.testType === "PRE");
+        const postData = data.find((item) => item.testType === "POST");
+
+        if (preData) {
+          const distributions = preData.category_level_distributions;
+          setPreTestData({
+            overall: preData.overall_level_distribution || defaultLevels,
+            selfAwareness: distributions?.self_awareness || defaultLevels,
+            selfManagement: distributions?.social_management || defaultLevels,
+            socialAwareness: distributions?.social_awareness || defaultLevels,
+            relationshipSkills:
+              distributions?.relationship_skills || defaultLevels,
+            responsibleDecisionMaking:
+              distributions?.responsible_decision_making || defaultLevels,
+            metacognition: distributions?.metacognition || defaultLevels,
+            empathy: distributions?.empathy || defaultLevels,
+            criticalThinking: distributions?.critical_thinking || defaultLevels,
+            totalStudents: preData.total_students || 0,
+          });
+        }
+
+        if (postData) {
+          const distributions = postData.category_level_distributions;
+          setPostTestData({
+            overall: postData.overall_level_distribution || defaultLevels,
+            selfManagement: distributions?.social_management || defaultLevels,
+            socialAwareness: distributions?.social_awareness || defaultLevels,
+            relationshipSkills:
+              distributions?.relationship_skills || defaultLevels,
+            responsibleDecisionMaking:
+              distributions?.responsible_decision_making || defaultLevels,
+            metacognition: distributions?.metacognition || defaultLevels,
+            empathy: distributions?.empathy || defaultLevels,
+            criticalThinking: distributions?.critical_thinking || defaultLevels,
+            selfAwareness: distributions?.self_awareness || defaultLevels,
+            totalStudents: postData.total_students || 0,
+          });
+          setHasPostTest(true);
+        } else {
+          setPostTestData(null);
+          setHasPostTest(false);
+        }
+      } catch (err) {
+        console.error("Error fetching assessment data:", err);
+        setError("Failed to load assessment data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssessmentData();
+  }, [selectedGrade, selectedSchool, selectedAssessment]);
+
+  const getAggregatedData = (
+    preData: { beginner: number; growth: number; expert: number },
+    postData: { beginner: number; growth: number; expert: number } | undefined
+  ) => {
+    if (postData && hasPostTest) {
+      return {
+        beginner: preData.beginner + postData.beginner,
+        growth: preData.growth + postData.growth,
+        expert: preData.expert + postData.expert,
+      };
+    }
+    return preData;
+  };
+
+  const overallData = getAggregatedData(
+    preTestData.overall,
+    postTestData?.overall
+  );
+  const selfAwarenessData = getAggregatedData(
+    preTestData.selfAwareness,
+    postTestData?.selfAwareness
+  );
+  const selfManagementData = getAggregatedData(
+    preTestData.selfManagement,
+    postTestData?.selfManagement
+  );
+  const socialAwarenessData = getAggregatedData(
+    preTestData.socialAwareness,
+    postTestData?.socialAwareness
+  );
+  const relationshipSkillsData = getAggregatedData(
+    preTestData.relationshipSkills,
+    postTestData?.relationshipSkills
+  );
+  const responsibleDecisionMakingData = getAggregatedData(
+    preTestData.responsibleDecisionMaking,
+    postTestData?.responsibleDecisionMaking
+  );
+  const metacognitionData = getAggregatedData(
+    preTestData.metacognition,
+    postTestData?.metacognition
+  );
+  const empathyData = getAggregatedData(
+    preTestData.empathy,
+    postTestData?.empathy
+  );
+  const criticalThinkingData = getAggregatedData(
+    preTestData.criticalThinking,
+    postTestData?.criticalThinking
+  );
 
   const handleLogout = async () => {
     try {
@@ -63,10 +312,9 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        {/* Header */}
+      <div className="min-h-screen bg-primary-50 pb-20">
         <div className="bg-white shadow-sm border-b">
-          <header className="w-full bg-[#82A4DE] shadow-sm border-b flex items-center justify-between px-4 py-3 sm:px-6">
+          <header className="w-full bg-[#82A4DE] shadow-sm border-b flex items-center justify-between px-4 py-2 sm:px-6">
             <div className="flex items-center">
               <Image
                 src="/images/logo/logo.png"
@@ -74,9 +322,9 @@ export default function Dashboard() {
                 width={40}
                 height={20}
                 priority
-                className="h-8 w-auto object-contain"
+                className="h-6 w-auto object-contain"
               />
-              <span className="ml-3 text-white font-semibold text-xl">
+              <span className="ml-3 text-white font-medium text-lg">
                 {t("dashboard.title")}
               </span>
             </div>
@@ -103,41 +351,634 @@ export default function Dashboard() {
           </header>
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold text-primary-700 mb-4">
-              {t("dashboard.mainHeading")}
-            </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              {t("dashboard.mainDescription")}
-            </p>
-          </div>
-
-          {/* Tips Section */}
-          <div className="space-y-4">
-            {tips.map((tip, index) => (
-              <div
-                key={index}
-                className={`${tip.color} border rounded-xl p-6 shadow-sm transition-all duration-200 hover:shadow-md`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">{tip.icon}</div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-primary-700 text-xl mb-3">
-                      {tip.title}
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed text-lg">
-                      {tip.content}
-                    </p>
+        <div className="px-4 py-4 space-y-6">
+          <section id="overview">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-semibold text-primary-700 mb-4">
+                {t("dashboard.mainHeading")}
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                {t("dashboard.mainDescription")}
+              </p>
+            </div>
+            <div className="space-y-4">
+              {tips.map((tip, index) => (
+                <div
+                  key={index}
+                  className={`${tip.color} border rounded-xl p-6 transition-all duration-200`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 mt-1">{tip.icon}</div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-primary-700 text-xl mb-3">
+                        {tip.title}
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed text-lg">
+                        {tip.content}
+                      </p>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </section>
+
+          <section id="data-section" className="space-y-6">
+            {loading && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  <span className="ml-3 text-gray-600">
+                    {t("data.loading")}
+                  </span>
+                </div>
               </div>
-            ))}
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+
+            {selectedAssessment !== "teacher_survey" && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-medium text-primary-700">
+                    {t("data.quickSummary")}
+                  </h2>
+                  <button
+                    onClick={() => setShowQuickSummary(!showQuickSummary)}
+                    className="text-primary-700 hover:text-primary-700"
+                  >
+                    {showQuickSummary ? t("common.hide") : t("common.show")}
+                  </button>
+                </div>
+                {showQuickSummary && (
+                  <div className="bg-primary-50 rounded-xl p-4 border border-primary-100">
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {QUICK_SUMMARY_TEXT}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedAssessment === "teacher_survey" && aggregatedPreSurvey && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="mb-6">
+                  <h2 className="text-lg font-medium text-primary-700 mb-2">
+                    Teacher Survey Results
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Comparing Pre-Test{" "}
+                    {aggregatedPostSurvey && `to ${latestPostTestType}`}
+                  </p>
+                  {!aggregatedPostSurvey && (
+                    <p className="text-sm text-amber-600 mt-2">
+                      No post-test data available yet. Showing pre-test data
+                      only.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-8">
+                  {Object.keys(aggregatedPreSurvey).map((skillKey) => {
+                    const skill = skillKey as keyof TeacherSurveyCategory;
+                    const preData = aggregatedPreSurvey[skill];
+                    const postData = aggregatedPostSurvey?.[skill] || {};
+                    const labels = getSkillLabels(skill);
+                    const displayName = SKILL_DISPLAY_NAMES[skill];
+
+                    return (
+                      <div key={skill} className="bg-gray-50 rounded-lg p-4">
+                        <TeacherSurveyBarChart
+                          preData={preData}
+                          postData={postData}
+                          labels={labels}
+                          skillName={displayName}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {selectedAssessment !== "teacher_survey" && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <h2 className="text-lg font-medium text-primary-700 mb-4">
+                  {t("data.classesProgress")}
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 px-2 font-medium text-gray-700">
+                          Grade
+                        </th>
+                        <th className="text-left py-2 px-2 font-medium text-gray-700">
+                          {t("data.totalStudents")}
+                        </th>
+                        <th className="text-left py-2 px-2 font-medium text-gray-700">
+                          {t("data.assessmentEntries")}
+                        </th>
+                        <th className="text-left py-2 px-2 font-medium text-gray-700">
+                          {t("data.status")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const totalStudents = 76;
+                        const entries = 72;
+
+                        const getStatus = (
+                          total: number,
+                          completed: number
+                        ) => {
+                          if (completed === 0) return "pending";
+                          if (completed === total) return "completed";
+                          return "ongoing";
+                        };
+
+                        const status = getStatus(totalStudents, entries);
+
+                        return (
+                          <tr className="border-b border-gray-100">
+                            <td className="py-3 px-2 font-medium text-gray-900">
+                              Grade 1
+                            </td>
+                            <td className="py-3 px-2 text-gray-600">
+                              {totalStudents}
+                            </td>
+                            <td className="py-3 px-2 text-gray-600">
+                              {entries}
+                            </td>
+                            <td className="py-2">
+                              <StatusBadge status={status} />
+                            </td>
+                          </tr>
+                        );
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {selectedAssessment !== "teacher_survey" && (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <h2 className="text-lg font-medium text-primary-700 mb-4">
+                  {t("data.classAssessmentInsights")}
+                </h2>
+
+                <div className="mb-6">
+                  <button
+                    onClick={() => setShowOverallInsights(!showOverallInsights)}
+                    className="flex items-center gap-2 text-primary-600 font-medium mb-3"
+                  >
+                    {showOverallInsights ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                    {t("data.overall")}:
+                  </button>
+                  {showOverallInsights && (
+                    <div className="ml-6 space-y-4">
+                      <p className="text-gray-600 text-sm">
+                        {t("data.overallDescription")}
+                      </p>
+                      <p className="text-gray-700 font-medium">
+                        {t("data.totalStudentsOutOf", {
+                          count: hasPostTest
+                            ? preTestData.totalStudents +
+                              postTestData!.totalStudents
+                            : preTestData.totalStudents,
+                        })}
+                        :
+                      </p>
+
+                      <div className="flex gap-4">
+                        <CategoryCircle
+                          category="beginner"
+                          count={overallData.beginner}
+                          size="md"
+                        />
+                        <CategoryCircle
+                          category="growth"
+                          count={overallData.growth}
+                          size="md"
+                        />
+                        <CategoryCircle
+                          category="expert"
+                          count={overallData.expert}
+                          size="md"
+                        />
+                      </div>
+
+                      {hasPostTest && (
+                        <div className="mt-6 bg-white rounded-lg p-4 border border-gray-200">
+                          <p className="text-sm text-gray-600 mb-4">
+                            See how your students are doing in the{" "}
+                            <strong>2 categories</strong>:
+                          </p>
+                          <ComparisonBarChart
+                            preData={preTestData.overall}
+                            postData={postTestData!.overall}
+                          />
+                        </div>
+                      )}
+
+                      <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
+                        <Star className="w-4 h-4 text-primary-500" />
+                        {t("data.whatDoesThisMean")}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <button
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="flex items-center gap-2 text-primary-600 font-medium mb-3"
+                  >
+                    {showDetails ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                    {t("data.details")}:
+                  </button>
+                  {showDetails && (
+                    <div className="ml-6 space-y-6">
+                      <p className="text-gray-600 text-sm">
+                        {t("data.detailsDescription")}
+                      </p>
+                      <p className="text-gray-700 font-medium">
+                        {t("data.selSkillCategories")}
+                      </p>
+
+                      <div className="space-y-8">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.selfAwareness")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={selfAwarenessData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={selfAwarenessData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={selfAwarenessData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.selfAwareness}
+                                postData={postTestData!.selfAwareness}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.selfManagement")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={selfManagementData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={selfManagementData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={selfManagementData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.selfManagement}
+                                postData={postTestData!.selfManagement}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.socialAwareness")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={socialAwarenessData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={socialAwarenessData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={socialAwarenessData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.socialAwareness}
+                                postData={postTestData!.socialAwareness}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.relationshipSkills")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={relationshipSkillsData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={relationshipSkillsData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={relationshipSkillsData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.relationshipSkills}
+                                postData={postTestData!.relationshipSkills}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.responsibleDecisionMaking")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={responsibleDecisionMakingData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={responsibleDecisionMakingData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={responsibleDecisionMakingData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.responsibleDecisionMaking}
+                                postData={
+                                  postTestData!.responsibleDecisionMaking
+                                }
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.metacognition")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={metacognitionData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={metacognitionData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={metacognitionData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.metacognition}
+                                postData={postTestData!.metacognition}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.empathy")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={empathyData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={empathyData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={empathyData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.empathy}
+                                postData={postTestData!.empathy}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="font-medium text-gray-900 mb-4 text-lg">
+                            {t("data.criticalThinking")}
+                          </h4>
+                          <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+                            <CategoryCircle
+                              category="beginner"
+                              count={criticalThinkingData.beginner}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="growth"
+                              count={criticalThinkingData.growth}
+                              size="md"
+                            />
+                            <CategoryCircle
+                              category="expert"
+                              count={criticalThinkingData.expert}
+                              size="md"
+                            />
+                          </div>
+                          {hasPostTest && (
+                            <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                              <ComparisonBarChart
+                                preData={preTestData.criticalThinking}
+                                postData={postTestData!.criticalThinking}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <button className="flex items-center gap-2 px-4 py-2 bg-primary-50 border border-primary-200 rounded-xl text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors">
+                        <Star className="w-4 h-4 text-primary-500" />
+                        {t("data.howCanIMakeItBetter")}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <h3 className="font-medium text-gray-900 mb-3">
+                    {t("data.understandingCategories")}:
+                  </h3>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span>
+                        <strong className="text-[#EF4444]">
+                          {t("data.beginner")}:
+                        </strong>{" "}
+                        {t("data.beginnerDescription")}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span>
+                        <strong className="text-[#3B82F6]">
+                          {t("data.growth")}:
+                        </strong>{" "}
+                        {t("data.growthDescription")}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span>
+                        <strong className="text-[#22C55E]">
+                          {t("data.expert")}:
+                        </strong>{" "}
+                        {t("data.expertDescription")}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <div className="bg-white px-4 py-4 border-b shadow-sm">
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  School
+                </label>
+                <select
+                  value={selectedSchool}
+                  onChange={(e) => setSelectedSchool(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+                >
+                  {schools.map((school) => (
+                    <option key={school} value={school}>
+                      {school}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Grade
+                </label>
+                <select
+                  value={selectedGrade}
+                  onChange={(e) => setSelectedGrade(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+                >
+                  {grades.map((grade) => (
+                    <option key={grade} value={grade}>
+                      {grade}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("data.assessment")}
+              </label>
+              <select
+                value={selectedAssessment}
+                onChange={(e) =>
+                  setSelectedAssessment(
+                    e.target.value as
+                      | "child"
+                      | "teacher_report"
+                      | "teacher_survey"
+                      | "parent"
+                  )
+                }
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+              >
+                {Object.entries(assessments).map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
           <div className="flex justify-around">
             <Link href="/" className="flex flex-col items-center gap-1 py-2">
@@ -153,15 +994,6 @@ export default function Dashboard() {
               <MessageCircle className="w-6 h-6 text-gray-400" />
               <span className="text-xs text-gray-400">
                 {t("common.aiChat")}
-              </span>
-            </Link>
-            <Link
-              href="/data"
-              className="flex flex-col items-center gap-1 py-2"
-            >
-              <BarChart3 className="w-6 h-6 text-gray-400" />
-              <span className="text-xs text-gray-400">
-                {t("common.dataView")}
               </span>
             </Link>
           </div>

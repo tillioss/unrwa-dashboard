@@ -1,8 +1,7 @@
 {
   "common": {
     "home": "Home",
-    "aiChat": "AI Chat",
-    "dataView": "Data View",
+    "aiChat": "Ask Tilli",
     "show": "Show",
     "hide": "Hide"
   },
@@ -40,10 +39,12 @@
     }
   },
   "chat": {
-    "title": "AI Assistant",
+    "title": "Ask Tilli",
     "subtitle": "Ask me anything about your students",
     "welcomeMessage": "Hello! I'm your AI assistant. I can help you with questions about your students' assessments, provide insights on their progress, and suggest teaching strategies. What would you like to know?",
     "inputPlaceholder": "Ask me about your students' assessments, progress, or teaching strategies...",
+    "clearChat": "Clear Chat",
+    "sendMessage": "Send Message",
     "responses": {
       "response1": "Based on the assessment data, I can see that your Grade 3 students are showing strong improvement in self-awareness skills. The completion rate for Assessment 1 is 85%, which is above the target of 80%.",
       "response2": "Looking at the data, I notice that students in the 'Growth' category have increased by 15% this month. This suggests your teaching strategies are working well. Consider focusing on the 'Beginner' students who might need additional support.",

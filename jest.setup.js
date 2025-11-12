@@ -65,3 +65,11 @@ Object.defineProperty(document, "documentElement", {
 
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = jest.fn();
+
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+global.ResizeObserver = ResizeObserver;
