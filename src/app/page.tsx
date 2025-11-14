@@ -2,18 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  BookOpen,
   ChevronDown,
   ChevronRight,
   Home,
   LogOut,
   MessageCircle,
   Star,
-  TrendingUp,
-  Users,
   User,
 } from "lucide-react";
 import LanguagePicker from "@/components/LanguagePicker";
@@ -80,37 +77,6 @@ export default function Dashboard() {
   const schools = ["School 1", "School 2", "School 3"];
   const grades = ["Grade 1"];
   const assessments = ASSESSMENTS;
-
-  const tips = useMemo(() => {
-    const tipList = [
-      {
-        title: t("tips.nameItToTameIt.title"),
-        icon: <Star className="w-5 h-5 text-yellow-500" />,
-        content: t("tips.nameItToTameIt.content"),
-        color: "bg-white border-yellow-200",
-      },
-      {
-        title: t("tips.keepRoutinesPredictable.title"),
-        icon: <Users className="w-5 h-5 text-blue-500" />,
-        content: t("tips.keepRoutinesPredictable.content"),
-        color: "bg-white border-blue-200",
-      },
-      {
-        title: t("tips.growTheirFeelingWords.title"),
-        icon: <BookOpen className="w-5 h-5 text-green-500" />,
-        content: t("tips.growTheirFeelingWords.content"),
-        color: "bg-white border-green-200",
-      },
-      {
-        title: t("tips.checkInOneToOne.title"),
-        icon: <TrendingUp className="w-5 h-5 text-purple-500" />,
-        content: t("tips.checkInOneToOne.content"),
-        color: "bg-white border-purple-200",
-      },
-    ];
-    const randomIndex = Math.floor(Math.random() * tipList.length);
-    return [tipList[randomIndex]];
-  }, [t, i18n.language]);
 
   // Helper function to aggregate teacher survey data from all schools
   const aggregateTeacherSurveyData = (
@@ -351,38 +317,70 @@ export default function Dashboard() {
           </header>
         </div>
 
-        <div className="px-4 py-4 space-y-6">
-          <section id="overview">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-semibold text-primary-700 mb-4">
-                {t("dashboard.mainHeading")}
-              </h1>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                {t("dashboard.mainDescription")}
-              </p>
-            </div>
-            <div className="space-y-4">
-              {tips.map((tip, index) => (
-                <div
-                  key={index}
-                  className={`${tip.color} border rounded-xl p-6 transition-all duration-200`}
+        <div className="bg-white px-4 py-4 border-b shadow-sm">
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  School
+                </label>
+                <select
+                  value={selectedSchool}
+                  onChange={(e) => setSelectedSchool(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 mt-1">{tip.icon}</div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-primary-700 text-xl mb-3">
-                        {tip.title}
-                      </h3>
-                      <p className="text-gray-700 leading-relaxed text-lg">
-                        {tip.content}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  {schools.map((school) => (
+                    <option key={school} value={school}>
+                      {school}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Grade
+                </label>
+                <select
+                  value={selectedGrade}
+                  onChange={(e) => setSelectedGrade(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+                >
+                  {grades.map((grade) => (
+                    <option key={grade} value={grade}>
+                      {grade}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </section>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("data.assessment")}
+              </label>
+              <select
+                value={selectedAssessment}
+                onChange={(e) =>
+                  setSelectedAssessment(
+                    e.target.value as
+                      | "child"
+                      | "teacher_report"
+                      | "teacher_survey"
+                      | "parent"
+                  )
+                }
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+              >
+                {Object.entries(assessments).map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
 
+        <div className="px-4 py-4 space-y-6">
           <section id="data-section" className="space-y-6">
             {loading && (
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -914,69 +912,6 @@ export default function Dashboard() {
               </div>
             )}
           </section>
-        </div>
-
-        <div className="bg-white px-4 py-4 border-b shadow-sm">
-          <div className="space-y-3">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  School
-                </label>
-                <select
-                  value={selectedSchool}
-                  onChange={(e) => setSelectedSchool(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
-                >
-                  {schools.map((school) => (
-                    <option key={school} value={school}>
-                      {school}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Grade
-                </label>
-                <select
-                  value={selectedGrade}
-                  onChange={(e) => setSelectedGrade(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
-                >
-                  {grades.map((grade) => (
-                    <option key={grade} value={grade}>
-                      {grade}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("data.assessment")}
-              </label>
-              <select
-                value={selectedAssessment}
-                onChange={(e) =>
-                  setSelectedAssessment(
-                    e.target.value as
-                      | "child"
-                      | "teacher_report"
-                      | "teacher_survey"
-                      | "parent"
-                  )
-                }
-                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
-              >
-                {Object.entries(assessments).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
         </div>
 
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">

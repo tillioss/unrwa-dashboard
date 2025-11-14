@@ -121,7 +121,7 @@ describe("Dashboard Page", () => {
     ]);
   });
 
-  it("renders dashboard with main heading", async () => {
+  it("renders dashboard", async () => {
     mockUseAuth.mockReturnValue({
       user: {
         $id: "1",
@@ -141,38 +141,6 @@ describe("Dashboard Page", () => {
     await waitFor(() => {
       expect(mockGetScores).toHaveBeenCalled();
     });
-    expect(screen.getByText("SEL Skills Development Tips")).toBeInTheDocument();
-  });
-
-  it("displays a random tip", async () => {
-    mockUseAuth.mockReturnValue({
-      user: {
-        $id: "1",
-        name: "Test",
-        email: "test@test.com",
-        emailVerification: true,
-        prefs: {},
-      },
-      loading: false,
-      login: jest.fn(),
-      logout: mockLogout,
-      isAuthenticated: true,
-    });
-
-    render(<Dashboard />);
-
-    await waitFor(() => {
-      expect(mockGetScores).toHaveBeenCalled();
-    });
-    // Should display at least one tip
-    const tipTitles = [
-      "Name it to tame it",
-      "Keep routines predictable",
-      "Grow their feeling words",
-      "Check in one-to-one",
-    ];
-    const displayedTip = tipTitles.find((title) => screen.queryByText(title));
-    expect(displayedTip).toBeDefined();
   });
 
   it("displays user information when logged in", async () => {
