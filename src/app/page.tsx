@@ -29,7 +29,6 @@ import {
   TeacherSurveyCategory,
   type ProcessedAssessmentData,
   getSkillLabels,
-  SKILL_DISPLAY_NAMES,
 } from "@/utils/data";
 
 const defaultLevels = {
@@ -383,7 +382,7 @@ export default function Dashboard() {
         <div className="px-4 py-4 space-y-6">
           <section id="data-section" className="space-y-6">
             {loading && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                   <span className="ml-3 text-gray-600">
@@ -400,7 +399,7 @@ export default function Dashboard() {
             )}
 
             {selectedAssessment !== "teacher_survey" && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-lg font-medium text-primary-700">
                     {t("data.quickSummary")}
@@ -423,7 +422,7 @@ export default function Dashboard() {
             )}
 
             {selectedAssessment === "teacher_survey" && aggregatedPreSurvey && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                 <div className="mb-6">
                   <h2 className="text-lg font-medium text-primary-700 mb-2">
                     Teacher Survey Results
@@ -432,12 +431,6 @@ export default function Dashboard() {
                     Comparing Pre-Test{" "}
                     {aggregatedPostSurvey && `to ${latestPostTestType}`}
                   </p>
-                  {!aggregatedPostSurvey && (
-                    <p className="text-sm text-amber-600 mt-2">
-                      No post-test data available yet. Showing pre-test data
-                      only.
-                    </p>
-                  )}
                 </div>
 
                 <div className="space-y-8">
@@ -446,7 +439,8 @@ export default function Dashboard() {
                     const preData = aggregatedPreSurvey[skill];
                     const postData = aggregatedPostSurvey?.[skill] || {};
                     const labels = getSkillLabels(skill);
-                    const displayName = SKILL_DISPLAY_NAMES[skill];
+                    const displayName = t(`survey.${skill}.title`);
+                    const description = t(`survey.${skill}.description`);
 
                     return (
                       <div key={skill} className="bg-gray-50 rounded-lg p-4">
@@ -455,6 +449,7 @@ export default function Dashboard() {
                           postData={postData}
                           labels={labels}
                           skillName={displayName}
+                          skillDescription={description}
                         />
                       </div>
                     );
@@ -464,7 +459,7 @@ export default function Dashboard() {
             )}
 
             {selectedAssessment !== "teacher_survey" && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                 <h2 className="text-lg font-medium text-primary-700 mb-4">
                   {t("data.classesProgress")}
                 </h2>
@@ -526,7 +521,7 @@ export default function Dashboard() {
             )}
 
             {selectedAssessment !== "teacher_survey" && (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                 <h2 className="text-lg font-medium text-primary-700 mb-4">
                   {t("data.classAssessmentInsights")}
                 </h2>
@@ -545,7 +540,7 @@ export default function Dashboard() {
                   </button>
                   {showOverallInsights && (
                     <div className="ml-6 space-y-4">
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-gray-600 text-sm mb-4">
                         {t("data.overallDescription")}
                       </p>
                       <p className="text-gray-700 font-medium">
@@ -611,7 +606,7 @@ export default function Dashboard() {
                   </button>
                   {showDetails && (
                     <div className="ml-6 space-y-6">
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-gray-600 text-sm mb-4">
                         {t("data.detailsDescription")}
                       </p>
                       <p className="text-gray-700 font-medium">
@@ -621,8 +616,11 @@ export default function Dashboard() {
                       <div className="space-y-8">
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.selfAwareness")}
+                            {t("data.selfAwareness.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.selfAwareness.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"
@@ -652,8 +650,11 @@ export default function Dashboard() {
 
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.selfManagement")}
+                            {t("data.selfManagement.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.selfManagement.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"
@@ -683,8 +684,11 @@ export default function Dashboard() {
 
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.socialAwareness")}
+                            {t("data.socialAwareness.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.socialAwareness.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"
@@ -714,8 +718,11 @@ export default function Dashboard() {
 
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.relationshipSkills")}
+                            {t("data.relationshipSkills.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.relationshipSkills.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"
@@ -745,8 +752,11 @@ export default function Dashboard() {
 
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.responsibleDecisionMaking")}
+                            {t("data.responsibleDecisionMaking.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.responsibleDecisionMaking.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"
@@ -778,8 +788,11 @@ export default function Dashboard() {
 
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.metacognition")}
+                            {t("data.metacognition.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.metacognition.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"
@@ -809,8 +822,11 @@ export default function Dashboard() {
 
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.empathy")}
+                            {t("data.empathy.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.empathy.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"
@@ -840,8 +856,11 @@ export default function Dashboard() {
 
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h4 className="font-medium text-gray-900 mb-4 text-lg">
-                            {t("data.criticalThinking")}
+                            {t("data.criticalThinking.title")}
                           </h4>
+                          <p className="text-gray-600 text-sm mb-4">
+                            {t("data.criticalThinking.description")}
+                          </p>
                           <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
                             <CategoryCircle
                               category="beginner"

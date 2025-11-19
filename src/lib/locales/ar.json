@@ -75,14 +75,38 @@
     "details": "التفاصيل",
     "detailsDescription": "انظر إلى بيانات كل فئة",
     "selSkillCategories": "انظر كيف يؤدّي طلابك في فئات المهارات الاجتماعية والعاطفية الثمانية:",
-    "selfAwareness": "الوعي الذاتي",
-    "selfManagement": "إدارة الذات",
-    "socialAwareness": "الوعي الاجتماعي",
-    "relationshipSkills": "مهارات العلاقات",
-    "responsibleDecisionMaking": "اتخاذ القرارات المسؤولة",
-    "metacognition": "ما وراء المعرفة",
-    "empathy": "التعاطف",
-    "criticalThinking": "التفكير النقدي",
+    "selfAwareness": {
+      "title": "الوعي الذاتي",
+      "description": "فهم عواطفهم وقدراتهم وقيمهم."
+    },
+    "selfManagement": {
+      "title": "إدارة الذات",
+      "description": "إدارة عواطفهم وسلوكياتهم وأهدافهم بشكل فعال."
+    },
+    "socialAwareness": {
+      "title": "الوعي الاجتماعي",
+      "description": "فهم وتعاطف بشكل جيد مع الآخرين من أصول مختلفة."
+    },
+    "relationshipSkills": {
+      "title": "مهارات العلاقات",
+      "description": "بناء وصيانة العلاقات الصحية والمواقف المتعاونة مع الآخرين."
+    },
+    "responsibleDecisionMaking": {
+      "title": "اتخاذ القرارات المسؤولة",
+      "description": "اتخاذ قرارات معقولة وأخلاقية في المواقف اليومية."
+    },
+    "metacognition": {
+      "title": "ما وراء المعرفة",
+      "description": "تفكر في أفكارهم الخاصة لتحسين التعلم وحل المشكلات."
+    },
+    "empathy": {
+      "title": "التعاطف",
+      "description": "فهم وردود الأفعال للآخرين مع كراهية لهم."
+    },
+    "criticalThinking": {
+      "title": "التفكير النقدي",
+      "description": "تحليل وتقييم المعلومات لتقديم قرارات صحيحة."
+    },
     "howCanIMakeItBetter": "كيف يمكنني تحسينه؟",
     "understandingCategories": "فهم الفئات",
     "beginner": "مبتدئ",
@@ -91,6 +115,43 @@
     "growthDescription": "الطلاب الذين يظهرون تحسناً ونمواً في فهمهم.",
     "expert": "خبير",
     "expertDescription": "الطلاب الذين أظهروا فهماً قوياً للمفاهيم ويتفوقون."
+  },
+  "survey": {
+    "title": "استبيان المعلم",
+    "description": "استبيان المعلم هو استبيان يتم تعبئته من قبل المعلم لتقييم تقدم طلابهم في مهارات التعلم الاجتماعي والعاطفي.",
+    "sel_importance_belief": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "sel_incorporation_frequency": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "sel_confidence_level": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "sel_performance_frequency": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "disciplinary_issues_frequency": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "student_safety_respect_agreement": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "student_self_awareness_management": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "tilli_curriculum_confidence": {
+      "title": "كيف تؤدي فصولك الدراسية",
+      "description": "كيف تؤدي فصولك الدراسية"
+    },
+    "responsesToTheQuestions": "ردود الأفعال على الأسئلة"
   },
   "language": {
     "english": "English",

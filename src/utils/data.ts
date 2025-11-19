@@ -103,25 +103,6 @@ export const getSkillLabels = (
   return labelMappings[skillName];
 };
 
-export const SKILL_DISPLAY_NAMES: Record<keyof TeacherSurveyCategory, string> =
-  {
-    sel_importance_belief:
-      "How strongly do your teachers believe that Social-Emotional Learning should be a regular part of their daily teaching and classroom practice?",
-    sel_incorporation_frequency:
-      "How often have your teachers incorporated Social Emotional Learning in their teaching practices?",
-    sel_confidence_level:
-      "How confident are your teachers in performing SEL in their classroom?",
-    sel_performance_frequency:
-      "How often have your teachers performed SEL in their classrooms?",
-    disciplinary_issues_frequency:
-      "How often have you had to tackle disciplinary issues of children in your class?",
-    student_safety_respect_agreement: `How strongly do the teachers agree that "Students in my classroom feel safe and respected." ?`,
-    student_self_awareness_management:
-      "To what extent are your students able to show self awareness and self management?",
-    tilli_curriculum_confidence:
-      "How confident are your teachers to implement Tilli curriculum in their classrooms?",
-  };
-
 export const GRADES = ["All Grades", "Grade 1"];
 
 export const ASSESSMENTS = {

@@ -75,14 +75,38 @@
     "details": "Details",
     "detailsDescription": "See each category data",
     "selSkillCategories": "See how your students are doing in the 8 SEL skill categories:",
-    "selfAwareness": "Self Awareness",
-    "selfManagement": "Self Management",
-    "socialAwareness": "Social Awareness",
-    "relationshipSkills": "Relationship Skills",
-    "responsibleDecisionMaking": "Responsible Decision Making",
-    "metacognition": "Metacognition",
-    "empathy": "Empathy",
-    "criticalThinking": "Critical Thinking",
+    "selfAwareness": {
+      "title": "Self Awareness",
+      "description": "Understanding one's emotions, strengths, and values."
+    },
+    "selfManagement": {
+      "title": "Self Management",
+      "description": "Managing emotions, behaviors, and goals effectively."
+    },
+    "socialAwareness": {
+      "title": "Social Awareness",
+      "description": "Understanding and empathizing with others from diverse backgrounds."
+    },
+    "relationshipSkills": {
+      "title": "Relationship Skills",
+      "description": "Building and maintaining healthy, respectful connections with others."
+    },
+    "responsibleDecisionMaking": {
+      "title": "Responsible Decision Making",
+      "description": "Making thoughtful and ethical choices in everyday situations."
+    },
+    "metacognition": {
+      "title": "Metacognition",
+      "description": "Thinking about one’s own thinking to improve learning and problem-solving."
+    },
+    "empathy": {
+      "title": "Empathy",
+      "description": "Recognizing and responding to the feelings and needs of others with care."
+    },
+    "criticalThinking": {
+      "title": "Critical Thinking",
+      "description": "Analyzing and evaluating information to make sound judgments."
+    },
     "howCanIMakeItBetter": "How can I make it better?",
     "understandingCategories": "Understanding the categories",
     "beginner": "Beginner",
@@ -91,6 +115,43 @@
     "growthDescription": "Students who are showing improvement and growth in their understanding.",
     "expert": "Expert",
     "expertDescription": "Students who have demonstrated a strong grasp of the concepts and are excelling."
+  },
+  "survey": {
+    "title": "Teacher Survey",
+    "description": "Teacher survey is a survey that is filled out by the teacher to evaluate the progress of their students in social and emotional learning skills.",
+    "sel_importance_belief": {
+      "title": "How strongly do your teachers believe that Social-Emotional Learning should be a regular part of their daily teaching and classroom practice?",
+      "description": "Measures teachers' belief in the importance of integrating SEL into everyday lessons."
+    },
+    "sel_incorporation_frequency": {
+      "title": "How often have your teachers incorporated Social Emotional Learning in their teaching practices?",
+      "description": "Tracks how frequently teachers weave SEL principles into classroom activities."
+    },
+    "sel_confidence_level": {
+      "title": "How confident are your teachers in performing SEL in their classroom?",
+      "description": "Assesses teachers' comfort and self-assurance in leading SEL-based learning."
+    },
+    "sel_performance_frequency": {
+      "title": "How often have your teachers performed SEL in their classrooms?",
+      "description": "Reflects the regularity of actual SEL lessons or activities conducted by teachers."
+    },
+    "disciplinary_issues_frequency": {
+      "title": "How often have you had to tackle disciplinary issues of children in your class? (in past 4 weeks from the date of administering the assessment)",
+      "description": "Indicates classroom behavioral challenges and the need for SEL-based interventions."
+    },
+    "student_safety_respect_agreement": {
+      "title": "How strongly do the teachers agree that 'Students in my classroom feel safe and respected.' ?",
+      "description": "Gauges perceptions of classroom climate and emotional safety for students."
+    },
+    "student_self_awareness_management": {
+      "title": "To what extent are your students able to show self awareness and self management?",
+      "description": "Captures teachers’ observations of students’ emotional regulation and reflection skills."
+    },
+    "tilli_curriculum_confidence": {
+      "title": "How confident are your teachers to implement Tilli curriculum in their classrooms?",
+      "description": "Measures readiness and confidence to deliver the Tilli SEL program effectively."
+    },
+    "responsesToTheQuestions": "Responses to the questions"
   },
   "language": {
     "english": "English",

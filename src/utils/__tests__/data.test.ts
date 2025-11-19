@@ -8,7 +8,6 @@ import {
   student_self_awareness_management,
   tilli_curriculum_confidence,
   getSkillLabels,
-  SKILL_DISPLAY_NAMES,
   ASSESSMENTS,
   GRADES,
   QUICK_SUMMARY_TEXT,
@@ -105,32 +104,6 @@ describe("data utilities", () => {
     it("returns correct labels for tilli_curriculum_confidence", () => {
       const labels = getSkillLabels("tilli_curriculum_confidence");
       expect(labels).toEqual(tilli_curriculum_confidence);
-    });
-  });
-
-  describe("SKILL_DISPLAY_NAMES", () => {
-    it("has display names for all skills", () => {
-      expect(SKILL_DISPLAY_NAMES.sel_importance_belief).toBeDefined();
-      expect(SKILL_DISPLAY_NAMES.sel_incorporation_frequency).toBeDefined();
-      expect(SKILL_DISPLAY_NAMES.sel_confidence_level).toBeDefined();
-      expect(SKILL_DISPLAY_NAMES.sel_performance_frequency).toBeDefined();
-      expect(SKILL_DISPLAY_NAMES.disciplinary_issues_frequency).toBeDefined();
-      expect(
-        SKILL_DISPLAY_NAMES.student_safety_respect_agreement
-      ).toBeDefined();
-      expect(
-        SKILL_DISPLAY_NAMES.student_self_awareness_management
-      ).toBeDefined();
-      expect(SKILL_DISPLAY_NAMES.tilli_curriculum_confidence).toBeDefined();
-    });
-
-    it("has meaningful display names", () => {
-      expect(SKILL_DISPLAY_NAMES.sel_importance_belief).toContain(
-        "Social-Emotional Learning"
-      );
-      expect(SKILL_DISPLAY_NAMES.sel_incorporation_frequency).toContain(
-        "incorporated"
-      );
     });
   });
 

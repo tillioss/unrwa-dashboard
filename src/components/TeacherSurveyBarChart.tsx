@@ -9,12 +9,31 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 
 interface TeacherSurveyBarChartProps {
   preData: Record<string, number>;
   postData: Record<string, number>;
   labels: Record<string, string>;
   skillName: string;
+  skillDescription: string;
+}
+
+export function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(`(max-width: ${breakpoint}px)`);
+
+    const listener = () => setIsMobile(media.matches);
+    listener();
+
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, [breakpoint]);
+
+  return isMobile;
 }
 
 export default function TeacherSurveyBarChart({
@@ -22,8 +41,11 @@ export default function TeacherSurveyBarChart({
   postData,
   labels,
   skillName,
+  skillDescription,
 }: TeacherSurveyBarChartProps) {
+  const { t } = useTranslation();
   const allKeys = Object.keys(labels).sort();
+  const isMobile = useIsMobile();
 
   const chartData = allKeys.map((key) => ({
     name: labels[key] || `Option ${key}`,
@@ -40,7 +62,7 @@ export default function TeacherSurveyBarChart({
   return (
     <div className="space-y-4">
       <h4 className="text-sm font-medium text-gray-900 mb-1">{skillName}</h4>
-
+      <p className="text-sm text-gray-600 mb-1">{skillDescription}</p>
       <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -49,14 +71,14 @@ export default function TeacherSurveyBarChart({
               top: 20,
               right: 30,
               left: 20,
-              bottom: 60,
+              bottom: 50,
             }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="name"
-              angle={-45}
-              textAnchor="end"
+              angle={isMobile ? -45 : 0}
+              textAnchor={isMobile ? "end" : "middle"}
               height={50}
               fontSize={12}
               stroke="#6b7280"
@@ -75,8 +97,11 @@ export default function TeacherSurveyBarChart({
               }}
             />
             <Legend
+              layout="horizontal"
+              verticalAlign="top"
+              align="center"
               wrapperStyle={{
-                paddingTop: "20px",
+                paddingBottom: "20px",
               }}
             />
             <Bar
@@ -93,11 +118,6 @@ export default function TeacherSurveyBarChart({
             />
           </BarChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* X-axis label */}
-      <div className="pt-3 text-sm text-gray-700 text-center">
-        Responses to the questions
       </div>
     </div>
   );
