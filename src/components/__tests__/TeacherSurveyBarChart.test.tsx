@@ -17,6 +17,28 @@ jest.mock("recharts", () => ({
   ),
 }));
 
+// Mock react-i18next
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
+// Mock window.matchMedia for useIsMobile hook
+Object.defineProperty(window, "matchMedia", {
+  writable: true,
+  value: jest.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // deprecated
+    removeListener: jest.fn(), // deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
 describe("TeacherSurveyBarChart", () => {
   const mockPreData = {
     "1": 5,
@@ -49,6 +71,7 @@ describe("TeacherSurveyBarChart", () => {
         postData={mockPostData}
         labels={mockLabels}
         skillName="Test Skill"
+        skillDescription="Test Description"
       />
     );
     expect(screen.getByTestId("bar-chart")).toBeInTheDocument();
@@ -62,6 +85,7 @@ describe("TeacherSurveyBarChart", () => {
         postData={mockPostData}
         labels={mockLabels}
         skillName="SEL Importance Belief"
+        skillDescription="Test Description"
       />
     );
     expect(screen.getByText("SEL Importance Belief")).toBeInTheDocument();
@@ -74,6 +98,7 @@ describe("TeacherSurveyBarChart", () => {
         postData={{}}
         labels={mockLabels}
         skillName="Test Skill"
+        skillDescription="Test Description"
       />
     );
     expect(screen.getByTestId("bar-chart")).toBeInTheDocument();
@@ -86,6 +111,7 @@ describe("TeacherSurveyBarChart", () => {
         postData={mockPostData}
         labels={mockLabels}
         skillName="Test Skill"
+        skillDescription="Test Description"
       />
     );
     expect(screen.getByTestId("bar-chart")).toBeInTheDocument();
@@ -105,21 +131,23 @@ describe("TeacherSurveyBarChart", () => {
         postData={mockPostData}
         labels={unsortedLabels}
         skillName="Test Skill"
+        skillDescription="Test Description"
       />
     );
     expect(screen.getByTestId("bar-chart")).toBeInTheDocument();
   });
 
-  it("displays x-axis label", () => {
+  it("displays skill description", () => {
     render(
       <TeacherSurveyBarChart
         preData={mockPreData}
         postData={mockPostData}
         labels={mockLabels}
         skillName="Test Skill"
+        skillDescription="Test Description"
       />
     );
-    expect(screen.getByText("Responses to the questions")).toBeInTheDocument();
+    expect(screen.getByText("Test Description")).toBeInTheDocument();
   });
 
   it("handles missing labels gracefully", () => {
@@ -133,6 +161,7 @@ describe("TeacherSurveyBarChart", () => {
         postData={mockPostData}
         labels={incompleteLabels}
         skillName="Test Skill"
+        skillDescription="Test Description"
       />
     );
     expect(screen.getByTestId("bar-chart")).toBeInTheDocument();
