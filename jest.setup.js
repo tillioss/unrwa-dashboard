@@ -35,36 +35,38 @@ jest.mock("next/link", () => {
   };
 });
 
-// Mock window.location
-Object.defineProperty(window, "location", {
-  value: {
-    origin: "http://localhost:3000",
-    href: "http://localhost:3000",
-  },
-  writable: true,
-});
+// Mock window.location (only in jsdom environment)
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "location", {
+    value: {
+      origin: "http://localhost:3000",
+      href: "http://localhost:3000",
+    },
+    writable: true,
+  });
 
-// Mock sessionStorage
-const sessionStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
-global.sessionStorage = sessionStorageMock;
+  // Mock sessionStorage
+  const sessionStorageMock = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+  };
+  global.sessionStorage = sessionStorageMock;
 
-// Mock document.documentElement
-Object.defineProperty(document, "documentElement", {
-  value: {
-    lang: "en",
-    dir: "ltr",
-    setAttribute: jest.fn(),
-  },
-  writable: true,
-});
+  // Mock document.documentElement
+  Object.defineProperty(document, "documentElement", {
+    value: {
+      lang: "en",
+      dir: "ltr",
+      setAttribute: jest.fn(),
+    },
+    writable: true,
+  });
 
-// Mock scrollIntoView
-Element.prototype.scrollIntoView = jest.fn();
+  // Mock scrollIntoView
+  Element.prototype.scrollIntoView = jest.fn();
+}
 
 class ResizeObserver {
   observe() {}

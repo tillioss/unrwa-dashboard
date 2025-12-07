@@ -1,0 +1,25 @@
+openapi: 3.1.0
+info:
+  title: Tilli Dashboard Translation API
+  version: 1.0.0
+
+paths:
+  /api/translations/{lang}:
+    get:
+      summary: Returns translation JSON for a given language
+      parameters:
+        - name: lang
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [en, ar]
+      responses:
+        "200":
+          description: Translation file
+          content:
+            application/json:
+              schema:
+                type: object
+        "404":
+          description: Language not found
