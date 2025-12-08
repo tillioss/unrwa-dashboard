@@ -34,17 +34,17 @@ export default function ComparisonBarChart({
 
   const chartData = [
     {
-      name: t("data.beginner"),
+      name: t("beginner"),
       Pre: preData.beginner,
       Post: postData.beginner,
     },
     {
-      name: t("data.growth"),
+      name: t("learner"),
       Pre: preData.growth,
       Post: postData.growth,
     },
     {
-      name: t("data.expert"),
+      name: t("expert"),
       Pre: preData.expert,
       Post: postData.expert,
     },

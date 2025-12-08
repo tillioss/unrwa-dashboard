@@ -8,8 +8,6 @@ import {
   student_self_awareness_management,
   tilli_curriculum_confidence,
   getSkillLabels,
-  ASSESSMENTS,
-  GRADES,
   QUICK_SUMMARY_TEXT,
 } from "../data";
 
@@ -104,29 +102,6 @@ describe("data utilities", () => {
     it("returns correct labels for tilli_curriculum_confidence", () => {
       const labels = getSkillLabels("tilli_curriculum_confidence");
       expect(labels).toEqual(tilli_curriculum_confidence);
-    });
-  });
-
-  describe("ASSESSMENTS", () => {
-    it("has all assessment types", () => {
-      expect(ASSESSMENTS.teacher_report).toBeDefined();
-      expect(ASSESSMENTS.child).toBeDefined();
-      expect(ASSESSMENTS.teacher_survey).toBeDefined();
-      expect(ASSESSMENTS.parent).toBeDefined();
-    });
-
-    it("has correct assessment names", () => {
-      expect(ASSESSMENTS.teacher_report).toBe("Assessment 1: Teacher Report");
-      expect(ASSESSMENTS.child).toBe("Assessment 2: Student Self-Assessment");
-      expect(ASSESSMENTS.teacher_survey).toBe("Assessment 3: Teacher Survey");
-      expect(ASSESSMENTS.parent).toBe("Assessment 4: Parent Questionnaire");
-    });
-  });
-
-  describe("GRADES", () => {
-    it("has grade options", () => {
-      expect(GRADES).toContain("All Grades");
-      expect(GRADES).toContain("Grade 1");
     });
   });
 

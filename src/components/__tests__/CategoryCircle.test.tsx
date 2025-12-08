@@ -5,7 +5,7 @@ describe("CategoryCircle", () => {
   it("renders with default props", () => {
     render(<CategoryCircle category="beginner" count={5} />);
     expect(screen.getByText("5")).toBeInTheDocument();
-    expect(screen.getByText("Beginner")).toBeInTheDocument();
+    expect(screen.getByText("beginner")).toBeInTheDocument();
   });
 
   it("renders beginner category with correct styling", () => {
@@ -17,9 +17,9 @@ describe("CategoryCircle", () => {
     expect(screen.getByText("10")).toBeInTheDocument();
   });
 
-  it("renders growth category with correct styling", () => {
+  it("renders learner category with correct styling", () => {
     const { container } = render(
-      <CategoryCircle category="growth" count={15} />
+      <CategoryCircle category="learner" count={15} />
     );
     const circle = container.querySelector(".bg-\\[\\#DBEAFE\\]");
     expect(circle).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe("CategoryCircle", () => {
 
   it("hides label when showLabel is false", () => {
     render(<CategoryCircle category="beginner" count={5} showLabel={false} />);
-    expect(screen.queryByText("Beginner")).not.toBeInTheDocument();
+    expect(screen.queryByText("beginner")).not.toBeInTheDocument();
     expect(screen.getByText("5")).toBeInTheDocument();
   });
 
@@ -74,13 +74,15 @@ describe("CategoryCircle", () => {
 
   it("capitalizes category name correctly", () => {
     render(<CategoryCircle category="beginner" count={5} />);
-    expect(screen.getByText("Beginner")).toBeInTheDocument();
+    expect(screen.getByText("beginner")).toBeInTheDocument();
 
-    const { rerender } = render(<CategoryCircle category="growth" count={5} />);
-    expect(screen.getByText("Growth")).toBeInTheDocument();
+    const { rerender } = render(
+      <CategoryCircle category="learner" count={5} />
+    );
+    expect(screen.getByText("learner")).toBeInTheDocument();
 
     rerender(<CategoryCircle category="expert" count={5} />);
-    expect(screen.getByText("Expert")).toBeInTheDocument();
+    expect(screen.getByText("expert")).toBeInTheDocument();
   });
 
   it("handles default category case", () => {

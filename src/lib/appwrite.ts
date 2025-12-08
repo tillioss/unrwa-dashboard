@@ -57,10 +57,14 @@ export const getScores = async ({
   school,
   grade,
   assessment,
+  section,
+  zone,
 }: {
   school: string;
   grade: string;
   assessment: "child" | "teacher_report" | "parent";
+  section: string;
+  zone: string;
 }): Promise<Score[]> => {
   const agg = await databases.listDocuments(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
@@ -69,6 +73,8 @@ export const getScores = async ({
       Query.equal("school", school),
       Query.equal("grade", grade),
       Query.equal("assessment", assessment),
+      Query.equal("section", section),
+      Query.equal("zone", zone),
     ]
   );
 

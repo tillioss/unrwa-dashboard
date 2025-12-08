@@ -1,5 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 interface CategoryCircleProps {
-  category: "beginner" | "growth" | "expert";
+  category: "beginner" | "learner" | "expert";
   count: number;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
@@ -13,6 +15,7 @@ export default function CategoryCircle({
   showLabel = true,
   className = "",
 }: CategoryCircleProps) {
+  const { t } = useTranslation();
   const getCategoryColors = (category: string) => {
     switch (category) {
       case "beginner":
@@ -20,7 +23,7 @@ export default function CategoryCircle({
           background: "bg-[#FEE2E2]",
           text: "text-[#EF4444]",
         };
-      case "growth":
+      case "learner":
         return {
           background: "bg-[#DBEAFE]",
           text: "text-[#3B82F6]",
@@ -77,7 +80,7 @@ export default function CategoryCircle({
       </div>
       {showLabel && (
         <span className={`font-medium text-gray-700 ${getLabelSize(size)}`}>
-          {category.charAt(0).toUpperCase() + category.slice(1)}
+          {t(category)}
         </span>
       )}
     </div>

@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import enData from "@/lib/locales/en.json";
+import arData from "@/lib/locales/ar.json";
 import {
   ChevronDown,
   ChevronRight,
@@ -23,7 +25,6 @@ import TeacherSurveyBarChart from "@/components/TeacherSurveyBarChart";
 import { getScores, getTeacherSurveys } from "@/lib/appwrite";
 import { Score } from "@/types";
 import {
-  ASSESSMENTS,
   QUICK_SUMMARY_TEXT,
   TeacherSurvey,
   TeacherSurveyCategory,
@@ -40,8 +41,10 @@ const defaultLevels = {
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
+  const [selectedZone, setSelectedZone] = useState("irbid");
   const [selectedSchool, setSelectedSchool] = useState("School 1");
-  const [selectedGrade, setSelectedGrade] = useState("Grade 1");
+  const [selectedGrade, setSelectedGrade] = useState("grade1");
+  const [selectedSection, setSelectedSection] = useState("a");
   const [selectedAssessment, setSelectedAssessment] = useState<
     "child" | "teacher_report" | "teacher_survey" | "parent"
   >("teacher_report");
@@ -73,9 +76,29 @@ export default function Dashboard() {
     useState<TeacherSurveyCategory | null>(null);
   const [latestPostTestType, setLatestPostTestType] = useState<string>("");
 
-  const schools = ["School 1", "School 2", "School 3"];
-  const grades = ["Grade 1"];
-  const assessments = ASSESSMENTS;
+  const data: any = i18n.language === "ar" ? arData : enData;
+
+  const schools = data.zonesToSchools[selectedZone] || [];
+  const gradeOptions = [data.grades.grade1];
+  const sectionOptions = [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+  ];
+  const assessments = [
+    t("teacher_report"),
+    t("child"),
+    t("teacher_survey"),
+    t("parent"),
+  ];
 
   // Helper function to aggregate teacher survey data from all schools
   const aggregateTeacherSurveyData = (
@@ -157,6 +180,8 @@ export default function Dashboard() {
         const data: Score[] = await getScores({
           school: selectedSchool,
           grade: selectedGrade,
+          section: selectedSection,
+          zone: selectedZone,
           assessment: selectedAssessment as
             | "child"
             | "teacher_report"
@@ -214,7 +239,13 @@ export default function Dashboard() {
     };
 
     fetchAssessmentData();
-  }, [selectedGrade, selectedSchool, selectedAssessment]);
+  }, [
+    selectedZone,
+    selectedSection,
+    selectedGrade,
+    selectedSchool,
+    selectedAssessment,
+  ]);
 
   const getAggregatedData = (
     preData: { beginner: number; growth: number; expert: number },
@@ -277,7 +308,7 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-primary-50 pb-20">
+      <div className="bg-primary-50 pb-20">
         <div className="bg-white shadow-sm border-b">
           <header className="w-full bg-[#82A4DE] shadow-sm border-b flex items-center justify-between px-4 py-2 sm:px-6">
             <div className="flex items-center">
@@ -317,65 +348,106 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white px-4 py-4 border-b shadow-sm">
-          <div className="space-y-3">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  School
-                </label>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t("zone")}
+                  </label>
+                </div>
                 <select
-                  value={selectedSchool}
-                  onChange={(e) => setSelectedSchool(e.target.value)}
+                  value={selectedZone}
+                  onChange={(e) => setSelectedZone(e.target.value)}
                   className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
                 >
-                  {schools.map((school) => (
-                    <option key={school} value={school}>
-                      {school}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Grade
-                </label>
-                <select
-                  value={selectedGrade}
-                  onChange={(e) => setSelectedGrade(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
-                >
-                  {grades.map((grade) => (
-                    <option key={grade} value={grade}>
-                      {grade}
+                  {Object.keys(data.zones).map((zone: string) => (
+                    <option key={zone} value={zone}>
+                      {data.zones[zone]}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
+
+            <div className="flex-1">
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t("section")}
+                  </label>
+                </div>
+                <select
+                  value={selectedSection}
+                  onChange={(e) => setSelectedSection(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+                >
+                  {sectionOptions.map((section: string) => (
+                    <option key={section} value={section}>
+                      {t(`sections.${section}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("data.assessment")}
+                {t("school")}
               </label>
               <select
-                value={selectedAssessment}
-                onChange={(e) =>
-                  setSelectedAssessment(
-                    e.target.value as
-                      | "child"
-                      | "teacher_report"
-                      | "teacher_survey"
-                      | "parent"
-                  )
-                }
+                value={selectedSchool}
+                onChange={(e) => setSelectedSchool(e.target.value)}
                 className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
               >
-                {Object.entries(assessments).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
+                {schools.map((school: string) => (
+                  <option key={school} value={school}>
+                    {data.schools[school]}
                   </option>
                 ))}
               </select>
             </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("grade")}
+              </label>
+              <select
+                value={selectedGrade}
+                onChange={(e) => setSelectedGrade(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+              >
+                {gradeOptions.map((grade) => (
+                  <option key={grade} value={grade}>
+                    {grade}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("data.assessment")}
+            </label>
+            <select
+              value={selectedAssessment}
+              onChange={(e) =>
+                setSelectedAssessment(
+                  e.target.value as
+                    | "child"
+                    | "teacher_report"
+                    | "teacher_survey"
+                    | "parent"
+                )
+              }
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 shadow-sm"
+            >
+              {Object.entries(assessments).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -560,7 +632,7 @@ export default function Dashboard() {
                           size="md"
                         />
                         <CategoryCircle
-                          category="growth"
+                          category="learner"
                           count={overallData.growth}
                           size="md"
                         />
@@ -628,7 +700,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={selfAwarenessData.growth}
                               size="md"
                             />
@@ -662,7 +734,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={selfManagementData.growth}
                               size="md"
                             />
@@ -696,7 +768,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={socialAwarenessData.growth}
                               size="md"
                             />
@@ -730,7 +802,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={relationshipSkillsData.growth}
                               size="md"
                             />
@@ -764,7 +836,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={responsibleDecisionMakingData.growth}
                               size="md"
                             />
@@ -800,7 +872,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={metacognitionData.growth}
                               size="md"
                             />
@@ -834,7 +906,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={empathyData.growth}
                               size="md"
                             />
@@ -868,7 +940,7 @@ export default function Dashboard() {
                               size="md"
                             />
                             <CategoryCircle
-                              category="growth"
+                              category="learner"
                               count={criticalThinkingData.growth}
                               size="md"
                             />
@@ -905,7 +977,7 @@ export default function Dashboard() {
                     <li className="flex items-start gap-2">
                       <span>
                         <strong className="text-[#EF4444]">
-                          {t("data.beginner")}:
+                          {t("beginner")}:
                         </strong>{" "}
                         {t("data.beginnerDescription")}
                       </span>
@@ -913,7 +985,7 @@ export default function Dashboard() {
                     <li className="flex items-start gap-2">
                       <span>
                         <strong className="text-[#3B82F6]">
-                          {t("data.growth")}:
+                          {t("learner")}:
                         </strong>{" "}
                         {t("data.growthDescription")}
                       </span>
@@ -921,7 +993,7 @@ export default function Dashboard() {
                     <li className="flex items-start gap-2">
                       <span>
                         <strong className="text-[#22C55E]">
-                          {t("data.expert")}:
+                          {t("expert")}:
                         </strong>{" "}
                         {t("data.expertDescription")}
                       </span>
@@ -932,25 +1004,20 @@ export default function Dashboard() {
             )}
           </section>
         </div>
+      </div>
 
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
-          <div className="flex justify-around">
-            <Link href="/" className="flex flex-col items-center gap-1 py-2">
-              <Home className="w-6 h-6 text-primary-600" />
-              <span className="text-xs text-primary-600 font-medium">
-                {t("common.home")}
-              </span>
-            </Link>
-            <Link
-              href="/chat"
-              className="flex flex-col items-center gap-1 py-2"
-            >
-              <MessageCircle className="w-6 h-6 text-gray-400" />
-              <span className="text-xs text-gray-400">
-                {t("common.aiChat")}
-              </span>
-            </Link>
-          </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-lg">
+        <div className="flex justify-around">
+          <Link href="/" className="flex flex-col items-center gap-1 py-2">
+            <Home className="w-6 h-6 text-primary-600" />
+            <span className="text-xs text-primary-600 font-medium">
+              {t("common.home")}
+            </span>
+          </Link>
+          <Link href="/chat" className="flex flex-col items-center gap-1 py-2">
+            <MessageCircle className="w-6 h-6 text-gray-400" />
+            <span className="text-xs text-gray-400">{t("common.aiChat")}</span>
+          </Link>
         </div>
       </div>
     </ProtectedRoute>

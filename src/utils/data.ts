@@ -103,13 +103,4 @@ export const getSkillLabels = (
   return labelMappings[skillName];
 };
 
-export const GRADES = ["All Grades", "Grade 1"];
-
-export const ASSESSMENTS = {
-  teacher_report: "Assessment 1: Teacher Report",
-  child: "Assessment 2: Student Self-Assessment",
-  teacher_survey: "Assessment 3: Teacher Survey",
-  parent: "Assessment 4: Parent Questionnaire",
-};
-
 export const QUICK_SUMMARY_TEXT = `Assessment 1 shows strong progress in self-awareness skills across Grade 1-3 students. Pre-test completion rate is 80% with post-test ongoing. Key improvement areas identified in emotional regulation and social skills development.`;

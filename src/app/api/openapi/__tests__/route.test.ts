@@ -23,10 +23,14 @@ jest.mock("path", () => ({
 }));
 
 // Mock console.error to avoid noise in test output
-const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+const consoleErrorSpy = jest
+  .spyOn(console, "error")
+  .mockImplementation(() => {});
 
 describe("/api/openapi route", () => {
-  const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
+  const mockReadFileSync = readFileSync as jest.MockedFunction<
+    typeof readFileSync
+  >;
   const mockYamlLoad = yaml.load as jest.MockedFunction<typeof yaml.load>;
 
   beforeEach(() => {
@@ -148,4 +152,3 @@ paths:
     expect(response.headers.get("content-type")).toContain("application/json");
   });
 });
-

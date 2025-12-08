@@ -22,9 +22,9 @@ jest.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
-        "data.beginner": "Beginner",
-        "data.growth": "Growth",
-        "data.expert": "Expert",
+        beginner: "Beginner",
+        learner: "Learner",
+        expert: "Expert",
       };
       return translations[key] || key;
     },
