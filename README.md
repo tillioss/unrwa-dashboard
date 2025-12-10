@@ -96,6 +96,25 @@ To add support for additional languages:
 3. Update the `LanguagePicker` component to include the new language
 4. Add appropriate RTL support if needed
 
+## API Documentation
+
+The Tilli Dashboard provides a REST API for third-party integrations:
+
+- **Interactive API Docs**: Visit `/api-docs` for Swagger UI documentation
+- **OpenAPI Spec**: Available at `/api/openapi`
+- **API Documentation**: See [API.md](./API.md) for complete API reference
+
+### Available Endpoints
+
+- `GET /api/scores` - Get assessment scores (with optional filters)
+- `GET /api/teacher-surveys` - Get teacher survey data
+- `GET /api/translations/{lang}` - Get translations for a language (en/ar)
+- `GET /api/translations` - List supported languages
+- `GET /api/test/scores` - Get test/sample score data
+- `GET /api/test/teacher-surveys` - Get test/sample survey data
+
+All endpoints support CORS and are documented in the OpenAPI specification.
+
 ## Technologies Used
 
 - **Next.js 14**: React framework with app router
@@ -105,6 +124,7 @@ To add support for additional languages:
 - **react-i18next**: Internationalization for React
 - **i18next**: Internationalization framework
 - **Lucide React**: Icon library
+- **Appwrite**: Backend-as-a-Service for data storage
 
 ## Contributing
 

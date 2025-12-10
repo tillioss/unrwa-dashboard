@@ -1,25 +1,451 @@
 openapi: 3.1.0
 info:
-  title: Tilli Dashboard Translation API
+  title: Tilli Dashboard API
   version: 1.0.0
+  description: |
+    API for accessing Tilli Dashboard data and translations.
+    This API allows third-party integrations to retrieve assessment scores,
+    teacher surveys, and localized content for displaying the dashboard in different languages.
+    
+    The API integrates with Appwrite backend for data storage and retrieval.
+  contact:
+    name: Tilli Dashboard API Support
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://your-production-domain.com
+    description: Production server (update with your actual domain when deploying)
 
 paths:
-  /api/translations/{lang}:
+  /api/scores:
     get:
-      summary: Returns translation JSON for a given language
+      summary: Get assessment scores
+      description: |
+        Retrieves assessment scores from the Appwrite database. 
+        Can return all scores or filtered scores based on query parameters.
+        
+        If all filter parameters (school, grade, assessment, section, zone) are provided,
+        returns filtered results. Otherwise, returns all scores.
+      operationId: getScores
+      tags:
+        - Assessments
       parameters:
-        - name: lang
-          in: path
-          required: true
+        - name: school
+          in: query
+          required: false
+          description: School identifier
           schema:
             type: string
-            enum: [en, ar]
+            example: "azmi_mufti_boys_p1"
+        - name: grade
+          in: query
+          required: false
+          description: Grade level
+          schema:
+            type: string
+            example: "grade1"
+        - name: assessment
+          in: query
+          required: false
+          description: Assessment type
+          schema:
+            type: string
+            enum: [child, teacher_report, parent]
+            example: "child"
+        - name: section
+          in: query
+          required: false
+          description: Section identifier
+          schema:
+            type: string
+            example: "a"
+        - name: zone
+          in: query
+          required: false
+          description: Zone identifier
+          schema:
+            type: string
+            enum: [irbid, north_amman, south_amman, zarqa]
+            example: "irbid"
       responses:
         "200":
-          description: Translation file
+          description: Successfully retrieved scores
           content:
             application/json:
               schema:
                 type: object
+                properties:
+                  scores:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        $id:
+                          type: string
+                          description: Document ID
+                        school:
+                          type: string
+                        grade:
+                          type: string
+                        assessment:
+                          type: string
+                          enum: [child, teacher_report, parent]
+                        total_students:
+                          type: number
+                        testType:
+                          type: string
+                          enum: [PRE, POST]
+                        overall_level_distribution:
+                          type: object
+                          properties:
+                            beginner:
+                              type: number
+                            growth:
+                              type: number
+                            expert:
+                              type: number
+                        category_level_distributions:
+                          type: object
+                          properties:
+                            self_awareness:
+                              $ref: "#/components/schemas/LevelDistribution"
+                            social_management:
+                              $ref: "#/components/schemas/LevelDistribution"
+                            social_awareness:
+                              $ref: "#/components/schemas/LevelDistribution"
+                            relationship_skills:
+                              $ref: "#/components/schemas/LevelDistribution"
+                            responsible_decision_making:
+                              $ref: "#/components/schemas/LevelDistribution"
+                            metacognition:
+                              $ref: "#/components/schemas/LevelDistribution"
+                            empathy:
+                              $ref: "#/components/schemas/LevelDistribution"
+                            critical_thinking:
+                              $ref: "#/components/schemas/LevelDistribution"
+              example:
+                scores:
+                  - $id: "123456"
+                    school: "azmi_mufti_boys_p1"
+                    grade: "grade1"
+                    assessment: "child"
+                    total_students: 25
+                    testType: "PRE"
+                    overall_level_distribution:
+                      beginner: 8
+                      growth: 12
+                      expert: 5
+                    category_level_distributions:
+                      self_awareness:
+                        beginner: 5
+                        growth: 15
+                        expert: 5
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+  /api/teacher-surveys:
+    get:
+      summary: Get teacher survey data
+      description: |
+        Retrieves teacher survey data from the external API.
+        Returns survey responses organized by test period (preTest, postTest, post12WeekTest, post36WeekTest).
+      operationId: getTeacherSurveys
+      tags:
+        - Surveys
+      responses:
+        "200":
+          description: Successfully retrieved teacher surveys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preTest:
+                    type: object
+                    additionalProperties:
+                      $ref: "#/components/schemas/TeacherSurveyCategory"
+                  postTest:
+                    type: object
+                    additionalProperties:
+                      $ref: "#/components/schemas/TeacherSurveyCategory"
+                  post12WeekTest:
+                    type: object
+                    additionalProperties:
+                      $ref: "#/components/schemas/TeacherSurveyCategory"
+                  post36WeekTest:
+                    type: object
+                    additionalProperties:
+                      $ref: "#/components/schemas/TeacherSurveyCategory"
+              example:
+                preTest:
+                  "2024-01":
+                    sel_importance_belief:
+                      "1": 2
+                      "2": 5
+                      "3": 10
+                      "4": 15
+                      "5": 8
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+  /api/translations/{lang}:
+    get:
+      summary: Get translations for a specific language
+      description: |
+        Returns the complete translation JSON object for the specified language code.
+        This includes all UI strings, labels, and messages used throughout the dashboard.
+      operationId: getTranslations
+      tags:
+        - Translations
+      parameters:
+        - name: lang
+          in: path
+          required: true
+          description: Language code (ISO 639-1 format)
+          schema:
+            type: string
+            enum: [en, ar]
+            example: ar
+      responses:
+        "200":
+          description: Successfully retrieved translations
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Translation object containing all UI strings
+                additionalProperties: true
+                example:
+                  common:
+                    home: "الرئيسية"
+                    aiChat: "اسأل تيلي"
+                    show: "إظهار"
+                    hide: "إخفاء"
+                  auth:
+                    welcome: "مرحباً بك في تقييم تيلي"
+                    signIn: "تسجيل الدخول"
+                  dashboard:
+                    title: "لوحة تحكم التقييم"
+                    mainHeading: "نصائح تطوير مهارات التعلم الاجتماعي والعاطفي"
         "404":
-          description: Language not found
+          description: Language not supported
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Language not supported"
+              example:
+                error: "Language not supported"
+  
+  /api/translations:
+    get:
+      summary: List all supported languages
+      description: Returns a list of all language codes that are currently supported by the API.
+      operationId: listLanguages
+      tags:
+        - Translations
+      responses:
+        "200":
+          description: Successfully retrieved list of supported languages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  languages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          description: ISO 639-1 language code
+                          example: ar
+                        name:
+                          type: string
+                          description: Display name of the language
+                          example: العربية
+                        nativeName:
+                          type: string
+                          description: Native name of the language
+                          example: العربية
+              example:
+                languages:
+                  - code: en
+                    name: English
+                    nativeName: English
+                  - code: ar
+                    name: Arabic
+                    nativeName: العربية
+
+  /api/test/scores:
+    get:
+      summary: Get test/sample assessment scores
+      description: |
+        Returns sample assessment score data for testing purposes.
+        This endpoint does not require Appwrite connection and returns mock data
+        that matches the structure of the production /api/scores endpoint.
+      operationId: getTestScores
+      tags:
+        - Testing
+      responses:
+        "200":
+          description: Successfully retrieved test scores
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scores:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        $id:
+                          type: string
+                        school:
+                          type: string
+                        grade:
+                          type: string
+                        assessment:
+                          type: string
+                        total_students:
+                          type: number
+                        testType:
+                          type: string
+                        overall_level_distribution:
+                          $ref: "#/components/schemas/LevelDistribution"
+                        category_level_distributions:
+                          type: object
+              example:
+                scores:
+                  - $id: "test-123456"
+                    school: "azmi_mufti_boys_p1"
+                    grade: "grade1"
+                    assessment: "child"
+                    total_students: 25
+                    testType: "PRE"
+                    overall_level_distribution:
+                      beginner: 8
+                      growth: 12
+                      expert: 5
+
+  /api/test/teacher-surveys:
+    get:
+      summary: Get test/sample teacher survey data
+      description: |
+        Returns sample teacher survey data for testing purposes.
+        This endpoint does not require external API connection and returns mock data
+        that matches the structure of the production /api/teacher-surveys endpoint.
+      operationId: getTestTeacherSurveys
+      tags:
+        - Testing
+      responses:
+        "200":
+          description: Successfully retrieved test teacher surveys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preTest:
+                    type: object
+                  postTest:
+                    type: object
+                  post12WeekTest:
+                    type: object
+                  post36WeekTest:
+                    type: object
+              example:
+                preTest:
+                  "2024-01":
+                    sel_importance_belief:
+                      "1": 2
+                      "2": 5
+                      "3": 10
+                      "4": 15
+                      "5": 8
+
+components:
+  schemas:
+    LevelDistribution:
+      type: object
+      properties:
+        beginner:
+          type: number
+          description: Number of students in beginner level
+        growth:
+          type: number
+          description: Number of students in growth level
+        expert:
+          type: number
+          description: Number of students in expert level
+      example:
+        beginner: 5
+        growth: 15
+        expert: 5
+    
+    TeacherSurveyCategory:
+      type: object
+      properties:
+        sel_importance_belief:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for SEL importance belief
+        sel_incorporation_frequency:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for SEL incorporation frequency
+        sel_confidence_level:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for SEL confidence level
+        sel_performance_frequency:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for SEL performance frequency
+        disciplinary_issues_frequency:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for disciplinary issues frequency
+        student_safety_respect_agreement:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for student safety and respect agreement
+        student_self_awareness_management:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for student self-awareness and management
+        tilli_curriculum_confidence:
+          type: object
+          additionalProperties:
+            type: number
+          description: Distribution of responses for Tilli curriculum confidence
