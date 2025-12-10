@@ -254,4 +254,228 @@ describe("ChatPage", () => {
     expect(screen.getByText("Home")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ask Tilli" })).toBeInTheDocument();
   });
+
+  it("handles Enter key to send message", async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        $id: "1",
+        name: "Test",
+        email: "test@test.com",
+        emailVerification: true,
+        prefs: {},
+      },
+      loading: false,
+      login: jest.fn(),
+      logout: mockLogout,
+      isAuthenticated: true,
+    });
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: jest.fn().mockResolvedValue({ message: "AI Response" }),
+    });
+
+    render(<ChatPage />);
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+
+    const textarea = screen.getByPlaceholderText(
+      "Ask me about your students' assessments, progress, or teaching strategies..."
+    );
+
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "Test message" } });
+    });
+
+    await act(async () => {
+      fireEvent.keyPress(textarea, { key: "Enter", code: "Enter", shiftKey: false });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Test message")).toBeInTheDocument();
+    });
+  });
+
+  it("does not send message on Shift+Enter", async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        $id: "1",
+        name: "Test",
+        email: "test@test.com",
+        emailVerification: true,
+        prefs: {},
+      },
+      loading: false,
+      login: jest.fn(),
+      logout: mockLogout,
+      isAuthenticated: true,
+    });
+
+    render(<ChatPage />);
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+
+    const textarea = screen.getByPlaceholderText(
+      "Ask me about your students' assessments, progress, or teaching strategies..."
+    );
+
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "Test message" } });
+    });
+
+    await act(async () => {
+      fireEvent.keyPress(textarea, { key: "Enter", code: "Enter", shiftKey: true });
+    });
+
+    // Message should not be sent
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("does not send empty message", async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        $id: "1",
+        name: "Test",
+        email: "test@test.com",
+        emailVerification: true,
+        prefs: {},
+      },
+      loading: false,
+      login: jest.fn(),
+      logout: mockLogout,
+      isAuthenticated: true,
+    });
+
+    render(<ChatPage />);
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+
+    const textarea = screen.getByPlaceholderText(
+      "Ask me about your students' assessments, progress, or teaching strategies..."
+    );
+
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "   " } });
+    });
+
+    const sendButton = screen.getByRole("button", { name: "Send Message" });
+    await act(async () => {
+      fireEvent.click(sendButton);
+    });
+
+    // Should not send empty message
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("loads messages from sessionStorage on mount", async () => {
+    const storedMessages = [
+      {
+        id: "1",
+        text: "Stored message",
+        sender: "user",
+        timestamp: new Date().toISOString(),
+      },
+    ];
+    sessionStorage.setItem("chat", JSON.stringify(storedMessages));
+
+    mockUseAuth.mockReturnValue({
+      user: {
+        $id: "1",
+        name: "Test",
+        email: "test@test.com",
+        emailVerification: true,
+        prefs: {},
+      },
+      loading: false,
+      login: jest.fn(),
+      logout: mockLogout,
+      isAuthenticated: true,
+    });
+
+    render(<ChatPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Stored message")).toBeInTheDocument();
+    });
+  });
+
+  it("handles logout errors gracefully", async () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    mockLogout.mockRejectedValue(new Error("Logout failed"));
+
+    mockUseAuth.mockReturnValue({
+      user: {
+        $id: "1",
+        name: "Test",
+        email: "test@test.com",
+        emailVerification: true,
+        prefs: {},
+      },
+      loading: false,
+      login: jest.fn(),
+      logout: mockLogout,
+      isAuthenticated: true,
+    });
+
+    render(<ChatPage />);
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+
+    const logoutButton = screen.getByTitle("Logout");
+    fireEvent.click(logoutButton);
+
+    await waitFor(() => {
+      expect(mockLogout).toHaveBeenCalled();
+    });
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Logout failed:", expect.any(Error));
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("saves messages to sessionStorage", async () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        $id: "1",
+        name: "Test",
+        email: "test@test.com",
+        emailVerification: true,
+        prefs: {},
+      },
+      loading: false,
+      login: jest.fn(),
+      logout: mockLogout,
+      isAuthenticated: true,
+    });
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: jest.fn().mockResolvedValue({ message: "AI Response" }),
+    });
+
+    render(<ChatPage />);
+    await waitFor(() => {
+      expect(mockGetAllScores).toHaveBeenCalled();
+    });
+
+    const textarea = screen.getByPlaceholderText(
+      "Ask me about your students' assessments, progress, or teaching strategies..."
+    );
+
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "Test message" } });
+    });
+
+    const sendButton = screen.getByRole("button", { name: "Send Message" });
+    await act(async () => {
+      fireEvent.click(sendButton);
+    });
+
+    await waitFor(() => {
+      const stored = sessionStorage.getItem("chat");
+      expect(stored).toBeTruthy();
+      const parsed = JSON.parse(stored!);
+      expect(parsed.length).toBeGreaterThan(1);
+    });
+  });
 });
