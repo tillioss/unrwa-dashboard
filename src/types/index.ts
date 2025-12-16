@@ -23,3 +23,7 @@ export interface Score {
     critical_thinking: LevelDistribution;
   };
 }
+
+export type SchoolSections = Record<string, number>;
+
+export type SchoolsData = Record<string, SchoolSections>;

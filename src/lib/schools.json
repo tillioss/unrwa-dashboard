@@ -1,0 +1,327 @@
+{
+  "baqoura_mixed_prep": {
+    "a": 4
+  },
+  "manshiya_boys_prep": {
+    "a": 13
+  },
+  "mashare_boys_prep": {
+    "a": 32
+  },
+  "mashare_girls_prep": {
+    "a": 32
+  },
+  "azmi_mufti_girls_p1": {
+    "a": 38,
+    "e": 36
+  },
+  "irbid_camp_boys_p": {
+    "d": 34,
+    "c": 36,
+    "a": 37
+  },
+  "hussein_mixed_prep_1": {
+    "a": 87
+  },
+  "irbid_camp_girls_prep_1": {
+    "b": 40
+  },
+  "irbid_city_boys_primary": {
+    "a": 13,
+    "b": 0
+  },
+  "irbid_city_boys_primary_2": {
+    "b": 35,
+    "a": 35
+  },
+  "irbid_city_mixed_prep_1": {
+    "a": 34
+  },
+  "joufa_girls_primary": {
+    "a": 61,
+    "b": 30
+  },
+  "irbid_city_boys_prep_3": {
+    "a": 58
+  },
+  "karamah_boys_prep": {
+    "a": 52
+  },
+  "irbid_city_girls_prep_2": {
+    "a": 28,
+    "b": 26
+  },
+  "irbid_city_girls_prep_3": {
+    "b": 21,
+    "a": 22
+  },
+  "irbid_city_girls_prep_4": {
+    "a": 19,
+    "b": 38
+  },
+  "jerash_camp_boys_prep_1": {
+    "a": 94,
+    "c": 46
+  },
+  "jerash_camp_boys_prep_2": {
+    "b": 41,
+    "a": 86
+  },
+  "jerash_camp_girls_prep_1": {
+    "c": 46,
+    "a": 85
+  },
+  "jerash_camp_girls_prep_2": {
+    "b": 45,
+    "a": 46
+  },
+  "qusour_mixed_1": {
+    "b": 16,
+    "c": 17
+  },
+  "kareema_boys_prep": {
+    "a": 13
+  },
+  "sukhna_boys_prep": {
+    "a": 23
+  },
+  "kareema_girls_prep": {
+    "a": 16
+  },
+  "north_shouneh_girls_prep": {
+    "a": 18
+  },
+  "ramtha_girls_prep": {
+    "a": 16
+  },
+  "taj_girls_prep": {
+    "a": 44
+  },
+  "souf_camp_boys_primary": {
+    "c": 35
+  },
+  "souf_camp_girls_prep_1": {
+    "a": 35
+  },
+  "taybeh_girls_primary": {
+    "c": 36,
+    "a": 36,
+    "b": 36
+  },
+  "waqqas_boys_prep": {
+    "a": 15
+  },
+  "hashemi_boys_prep_1": {
+    "a": 31
+  },
+  "hashemi_boys_prep_2": {
+    "b": 31
+  },
+  "hashemi_girls_prep_1": {
+    "a": 44
+  },
+  "hashemi_girls_prep_2": {
+    "a": 32
+  },
+  "zuhour_girls_primary": {
+    "a": 40,
+    "c": 38
+  },
+  "hussein_primary": {
+    "a": 30
+  },
+  "hussein_mixed_prep_2": {
+    "a": 34,
+    "b": 31
+  },
+  "amman_camp_boys_p1": {
+    "b": 42,
+    "d": 40,
+    "f": 40
+  },
+  "nuzha_girls_primary_1": {
+    "b": 30,
+    "a": 32
+  },
+  "nuzha_girls_primary_2": {
+    "a": 30
+  },
+  "nuzha_boys_prep_2": {
+    "a": 36
+  },
+  "nuzha_boys_prep_3": {
+    "a": 33
+  },
+  "qusour_mixed_2": {
+    "b": 19
+  },
+  "baqaa_mixed_1": {
+    "a": 47,
+    "c": 39,
+    "b": 43
+  },
+  "baqaa_mixed_2": {
+    "b": 47,
+    "c": 46,
+    "d": 46,
+    "a": 47
+  },
+  "baqaa_boys_p1": {
+    "a": 44,
+    "c": 44
+  },
+  "baqaa_boys_p2": {
+    "b": 36,
+    "a": 37,
+    "e": 37,
+    "h": 37
+  },
+  "baqaa_boys_p4": {
+    "c": 1,
+    "b": 30
+  },
+  "baqaa_boys_p3": {
+    "a": 43,
+    "b": 43
+  },
+  "baqaa_girls_p3": {
+    "a": 40,
+    "b": 40,
+    "e": 41,
+    "d": 39,
+    "c": 40
+  },
+  "baqaa_girls_prep_2": {
+    "a": 45
+  },
+  "baqaa_girls_prep_1": {
+    "a": 38
+  },
+  "baqaa_girls_prep_4": {
+    "a": 41
+  },
+  "baqaa_girls_prep_5": {
+    "a": 43
+  },
+  "sweileh_girls_prep": {
+    "a": 27,
+    "b": 26
+  },
+  "wadi_seer_girls_prep": {
+    "a": 36
+  },
+  "ashrafiya_boys_prep_1": {
+    "a": 20
+  },
+  "ashrafiya_girls_prep_2": {
+    "a": 21
+  },
+  "joufa_boys_primary": {
+    "b": 44,
+    "a": 46
+  },
+  "nadheef_girls_prep_1": {
+    "a": 26
+  },
+  "taybeh_girls_prep_1": {
+    "b": 27,
+    "a": 26
+  },
+  "amman_camp_girls_p1": {
+    "a": 42
+  },
+  "madaba_girls_primary": {
+    "b": 34,
+    "a": 33
+  },
+  "nazzal_boys_primary": {
+    "a": 1,
+    "g": 20,
+    "e": 20
+  },
+  "marka_mixed_1": {
+    "a": 43,
+    "c": 41,
+    "d": 30,
+    "b": 40
+  },
+  "nazzal_girls_primary": {
+    "b": 22,
+    "d": 21,
+    "c": 22,
+    "a": 22
+  },
+  "marka_mixed_2": {
+    "a": 38,
+    "b": 38,
+    "c": 38,
+    "e": 38
+  },
+  "nazzal_girls_prep_1": {
+    "a": 19
+  },
+  "mafraq_girls_prep": {
+    "a": 17
+  },
+  "sukhna_girls_prep": {
+    "a": 32,
+    "b": 32
+  },
+  "owjan_mixed": {
+    "b": 27,
+    "c": 28,
+    "a": 28
+  },
+  "marka_boys_prep_1": {
+    "a": 25
+  },
+  "marka_boys_prep_2": {
+    "a": 27
+  },
+  "marka_boys_prep_3": {
+    "a": 23
+  },
+  "marka_girls_prep_1": {
+    "a": 40
+  },
+  "marka_girls_prep_2": {
+    "a": 38
+  },
+  "prince_hassan_boys_prep_2": {
+    "a": 32,
+    "b": 26
+  },
+  "russeifa_boys_prep_3": {
+    "a": 35,
+    "b": 23
+  },
+  "prince_hassan_girls_prep_1": {
+    "b": 30,
+    "a": 32
+  },
+  "russeifa_boys_primary": {
+    "a": 13
+  },
+  "russeifa_boys_prep_2": {
+    "a": 31
+  },
+  "wadi_hajar_boys_prep": {
+    "a": 44,
+    "b": 47
+  },
+  "russeifa_girls_prep_1": {
+    "a": 38
+  },
+  "wadi_hajar_girls_prep": {
+    "a": 47
+  },
+  "zarqa_boys_prep_1": {
+    "a": 28
+  },
+  "zarqa_boys_prep_2": {
+    "a": 31
+  },
+  "zarqa_girls_prep_1": {
+    "a": 35
+  }
+}

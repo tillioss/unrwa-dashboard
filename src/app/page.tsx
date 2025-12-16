@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import enData from "@/lib/locales/en.json";
 import arData from "@/lib/locales/ar.json";
+import schoolsDataRaw from "@/lib/schools.json";
 import {
   ChevronDown,
   ChevronRight,
@@ -23,7 +24,9 @@ import CategoryCircle from "@/components/CategoryCircle";
 import ComparisonBarChart from "@/components/ComparisonBarChart";
 import TeacherSurveyBarChart from "@/components/TeacherSurveyBarChart";
 import { getScores, getTeacherSurveys } from "@/lib/appwrite";
-import { Score } from "@/types";
+import { Score, SchoolsData } from "@/types";
+
+const schoolsData = schoolsDataRaw as SchoolsData;
 import {
   QUICK_SUMMARY_TEXT,
   TeacherSurvey,
@@ -75,24 +78,16 @@ export default function Dashboard() {
   const [aggregatedPostSurvey, setAggregatedPostSurvey] =
     useState<TeacherSurveyCategory | null>(null);
   const [latestPostTestType, setLatestPostTestType] = useState<string>("");
+  const [studentEntries, setStudentEntries] = useState<Record<string, number>>({
+    PRE: 0,
+    POST: 0,
+  });
 
   const data: any = i18n.language === "ar" ? arData : enData;
 
   const schools = data.zonesToSchools[selectedZone] || [];
   const gradeOptions = [data.grades.grade1];
-  const sectionOptions = [
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-  ];
+  const sectionOptions = Object.keys(data.sections) || [];
   const assessments = [
     t("teacher_report"),
     t("child"),
@@ -190,7 +185,6 @@ export default function Dashboard() {
 
         const preData = data.find((item) => item.testType === "PRE");
         const postData = data.find((item) => item.testType === "POST");
-
         if (preData) {
           const distributions = preData.category_level_distributions;
           setPreTestData({
@@ -207,6 +201,10 @@ export default function Dashboard() {
             criticalThinking: distributions?.critical_thinking || defaultLevels,
             totalStudents: preData.total_students || 0,
           });
+          setStudentEntries((prev) => ({
+            ...prev,
+            PRE: preData.total_students || 0,
+          }));
         }
 
         if (postData) {
@@ -225,6 +223,10 @@ export default function Dashboard() {
             selfAwareness: distributions?.self_awareness || defaultLevels,
             totalStudents: postData.total_students || 0,
           });
+          setStudentEntries((prev) => ({
+            ...prev,
+            POST: postData?.total_students || 0,
+          }));
           setHasPostTest(true);
         } else {
           setPostTestData(null);
@@ -297,6 +299,11 @@ export default function Dashboard() {
     preTestData.criticalThinking,
     postTestData?.criticalThinking
   );
+
+  const totalStudents =
+    selectedSchool && schoolsData[selectedSchool]
+      ? schoolsData[selectedSchool][selectedSection]
+      : undefined;
 
   const handleLogout = async () => {
     try {
@@ -555,33 +562,37 @@ export default function Dashboard() {
                     </thead>
                     <tbody>
                       {(() => {
-                        const totalStudents = 76;
-                        const entries = 72;
-
                         const getStatus = (
                           total: number,
                           completed: number
                         ) => {
                           if (completed === 0) return "pending";
-                          if (completed === total) return "completed";
+                          if (completed >= total) return "completed";
                           return "ongoing";
                         };
 
-                        const status = getStatus(totalStudents, entries);
+                        const status = getStatus(
+                          totalStudents ?? 0,
+                          studentEntries["PRE"]
+                        );
 
                         return (
                           <tr className="border-b border-gray-100">
                             <td className="py-3 px-2 font-medium text-gray-900">
-                              Grade 1
+                              {t(`grades.${selectedGrade}`)}
                             </td>
                             <td className="py-3 px-2 text-gray-600">
-                              {totalStudents}
+                              {totalStudents ?? t("notCollected")}
                             </td>
                             <td className="py-3 px-2 text-gray-600">
-                              {entries}
+                              {studentEntries["PRE"] ?? "N/A"}
                             </td>
                             <td className="py-2">
-                              <StatusBadge status={status} />
+                              {totalStudents ? (
+                                <StatusBadge status={status} />
+                              ) : (
+                                "-"
+                              )}
                             </td>
                           </tr>
                         );

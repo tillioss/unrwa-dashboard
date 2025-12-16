@@ -21,6 +21,12 @@ jest.mock("@/lib/locales/en.json", () => ({
   grades: {
     grade1: "Grade 1",
   },
+  sections: {
+    a: "A",
+    b: "B",
+    c: "C",
+    d: "D",
+  },
 }));
 
 jest.mock("@/lib/locales/ar.json", () => ({
@@ -40,6 +46,12 @@ jest.mock("@/lib/locales/ar.json", () => ({
   },
   grades: {
     grade1: "الصف الأول",
+  },
+  sections: {
+    a: "أ",
+    b: "ب",
+    c: "ج",
+    d: "د",
   },
 }));
 
@@ -81,10 +93,10 @@ jest.mock("react-i18next", () => ({
       "common.aiChat": "Ask Tilli",
       "common.show": "Show",
       "common.hide": "Hide",
-      "zone": "Zone",
-      "section": "Section",
-      "school": "School",
-      "grade": "Grade",
+      zone: "Zone",
+      section: "Section",
+      school: "School",
+      grade: "Grade",
       "data.assessment": "Assessment",
       "data.loading": "Loading...",
       "data.quickSummary": "Quick Summary",
@@ -102,10 +114,10 @@ jest.mock("react-i18next", () => ({
       "data.selSkillCategories": "SEL Skill Categories",
       "data.selfAwareness.title": "Self Awareness",
       "data.selfAwareness.description": "Self awareness description",
-      "teacher_report": "Teacher Report",
-      "child": "Child",
-      "teacher_survey": "Teacher Survey",
-      "parent": "Parent",
+      teacher_report: "Teacher Report",
+      child: "Child",
+      teacher_survey: "Teacher Survey",
+      parent: "Parent",
       "sections.a": "Section A",
       "sections.b": "Section B",
       "survey.sel_importance_belief.title": "SEL Importance Belief",
@@ -406,7 +418,9 @@ describe("Dashboard Page", () => {
     render(<Dashboard />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Failed to load assessment data/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Failed to load assessment data/i)
+      ).toBeInTheDocument();
     });
 
     consoleErrorSpy.mockRestore();
@@ -509,19 +523,26 @@ describe("Dashboard Page", () => {
     const assessmentSelect = assessmentSelects.find(
       (select) => (select as HTMLSelectElement).value === "teacher_report"
     );
-    
+
     if (assessmentSelect) {
-      fireEvent.change(assessmentSelect, { target: { value: "teacher_survey" } });
-      
-      await waitFor(() => {
-        expect(mockGetTeacherSurveys).toHaveBeenCalled();
-      }, { timeout: 3000 });
+      fireEvent.change(assessmentSelect, {
+        target: { value: "teacher_survey" },
+      });
+
+      await waitFor(
+        () => {
+          expect(mockGetTeacherSurveys).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
     }
   });
 
   it("handles errors when fetching teacher surveys", async () => {
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
-    mockGetTeacherSurveys.mockRejectedValue(new Error("Failed to fetch teacher surveys"));
+    mockGetTeacherSurveys.mockRejectedValue(
+      new Error("Failed to fetch teacher surveys")
+    );
 
     mockUseAuth.mockReturnValue({
       user: {
@@ -547,17 +568,27 @@ describe("Dashboard Page", () => {
     const assessmentSelect = assessmentSelects.find(
       (select) => (select as HTMLSelectElement).value === "teacher_report"
     );
-    
-    if (assessmentSelect) {
-      fireEvent.change(assessmentSelect, { target: { value: "teacher_survey" } });
-      
-      await waitFor(() => {
-        expect(mockGetTeacherSurveys).toHaveBeenCalled();
-      }, { timeout: 3000 });
 
-      await waitFor(() => {
-        expect(screen.getByText(/Failed to load teacher survey data/i)).toBeInTheDocument();
-      }, { timeout: 3000 });
+    if (assessmentSelect) {
+      fireEvent.change(assessmentSelect, {
+        target: { value: "teacher_survey" },
+      });
+
+      await waitFor(
+        () => {
+          expect(mockGetTeacherSurveys).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
+
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(/Failed to load teacher survey data/i)
+          ).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
     }
 
     consoleErrorSpy.mockRestore();
