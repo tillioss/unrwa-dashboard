@@ -51,6 +51,8 @@ export default function Dashboard() {
   const [selectedAssessment, setSelectedAssessment] = useState<
     "child" | "teacher_report" | "teacher_survey" | "parent"
   >("teacher_report");
+  const [teacherSurveyData, setTeacherSurveyData] =
+    useState<TeacherSurvey | null>(null);
   const [showQuickSummary, setShowQuickSummary] = useState(true);
   const [showOverallInsights, setShowOverallInsights] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
@@ -88,12 +90,12 @@ export default function Dashboard() {
   const schools = data.zonesToSchools[selectedZone] || [];
   const gradeOptions = [data.grades.grade1];
   const sectionOptions = Object.keys(data.sections) || [];
-  const assessments = [
-    t("teacher_report"),
-    t("child"),
-    t("teacher_survey"),
-    t("parent"),
-  ];
+  const assessments = {
+    teacher_report: t("teacher_report"),
+    child: t("child"),
+    teacher_survey: t("teacher_survey"),
+    parent: t("parent"),
+  };
 
   // Helper function to aggregate teacher survey data from all schools
   const aggregateTeacherSurveyData = (
@@ -113,7 +115,7 @@ export default function Dashboard() {
     Object.values(testData).forEach((schoolData) => {
       Object.keys(aggregated).forEach((skill) => {
         const skillKey = skill as keyof TeacherSurveyCategory;
-        const schoolSkillData = schoolData[skillKey];
+        const schoolSkillData = schoolData[skillKey] || {};
 
         Object.keys(schoolSkillData).forEach((responseKey) => {
           if (!aggregated[skillKey][responseKey]) {
@@ -134,7 +136,11 @@ export default function Dashboard() {
 
       if (selectedAssessment === "teacher_survey") {
         try {
-          const data: TeacherSurvey = await getTeacherSurveys();
+          const data: TeacherSurvey = !teacherSurveyData
+            ? await getTeacherSurveys()
+            : teacherSurveyData;
+
+          setTeacherSurveyData(data);
 
           if (data.preTest && Object.keys(data.preTest).length > 0) {
             const aggPre = aggregateTeacherSurveyData(data.preTest);
@@ -502,16 +508,6 @@ export default function Dashboard() {
 
             {selectedAssessment === "teacher_survey" && aggregatedPreSurvey && (
               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                <div className="mb-6">
-                  <h2 className="text-lg font-medium text-primary-700 mb-2">
-                    Teacher Survey Results
-                  </h2>
-                  <p className="text-sm text-gray-600">
-                    Comparing Pre-Test{" "}
-                    {aggregatedPostSurvey && `to ${latestPostTestType}`}
-                  </p>
-                </div>
-
                 <div className="space-y-8">
                   {Object.keys(aggregatedPreSurvey).map((skillKey) => {
                     const skill = skillKey as keyof TeacherSurveyCategory;

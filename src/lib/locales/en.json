@@ -163,10 +163,10 @@
   "learner": "Learner",
   "beginner": "Beginner",
   "expert": "Expert",
-  "teacher_report": "Assessment 1: Teacher Report",
-  "child": "Assessment 2: Student Self-Assessment",
-  "teacher_survey": "Assessment 3: Teacher Survey",
-  "parent": "Assessment 4: Parent Questionnaire",
+  "teacher_report": "Teacher Report on student SEL",
+  "child": "Student Direct Assessment",
+  "teacher_survey": "Teacher SEL Survey",
+  "parent": "Caregiver Report on student SEL",
   "grades": {
     "grade1": "Grade 1"
   },
